@@ -20,7 +20,6 @@ public $otp;
         $data = $request->validate(['email' => 'required|exists:users,email']);
              
         $user = User::whereEmail($data['email'])->first();
-     session()->put('forget_password_email',$data['email']);
          $user->notify(new ForgetpasswordNotification());
               return apiResponse(200, 'Otp Code Send Check Your Email');
     }
