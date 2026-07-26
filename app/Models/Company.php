@@ -20,4 +20,8 @@ protected $fillable = ['company_name','slug','industry','location','about','phon
     public function users(){
         return $this->hasMany(User::class);
     }
+
+    public function positions(){
+        return $this->hasMany(Position::class);
+    }
 }
