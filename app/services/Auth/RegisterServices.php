@@ -38,21 +38,21 @@ class RegisterServices
                 'company_size' => $data['company_size'],
                 'logo' => $data['logo'],
             ]);
-            $user = User::create([
+          $user= $company->users()->create([
                 'name'       => $data['name'],
                 'email'      => $data['email'],
                 'password'   => Hash::make($data['password']),
                 'company_id' => $company->id,
             ]);
+
+    
             $user->assignRole('Owner');
 
             DB::commit();
 return $user;
             } catch (\Exception $e) {
             DB::rollBack();
-                        $code=$e->getCode();
-         $code=$code==0 ? 500 : $code;
-            return apiResponse($code, ['message' => $e->getMessage()]);
+            throw $e;
         }
     }
     public function sendOtp($user)
