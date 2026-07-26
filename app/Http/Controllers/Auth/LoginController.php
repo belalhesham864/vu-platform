@@ -10,14 +10,19 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-       public function login(LoginRequest $request)
+    public function login(LoginRequest $request)
     {
         $data = $request->validated();
+        $user = auth()->user();
         $token = Auth::guard('api')->attempt($data);
+        if (!$user->email_verified_at) {
+            auth()->logout();
+            return apiResponse(403 ,'Please verify your email first.');
+        }
         if (!$token) {
             return apiResponse(401, 'Unauthorized');
         }
-        return apiResponse(200, 'Login Success', ['user' =>new UserResource(auth()->user()), 'token' => $token]);
+        return apiResponse(200, 'Login Success', ['user' => new UserResource($user), 'token' => $token]);
     }
     public function logout()
     {
