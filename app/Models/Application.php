@@ -32,21 +32,6 @@ class Application extends Model
         return $this->hasMany(Interview::class);
     }
 
-    public function cvAnalysis()
-    {
-        return $this->hasOne(CvAnalysis::class);
-    }
-
-    public function feedback()
-    {
-        return $this->hasMany(Feedback::class);
-    }
-
-    public function flags()
-    {
-        return $this->hasMany(Flag::class);
-    }
-
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');

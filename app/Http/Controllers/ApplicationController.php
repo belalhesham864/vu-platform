@@ -6,9 +6,8 @@ use App\Http\Requests\Application\ApplicationRequest;
 use App\Http\Resources\Application\ApplicationResource;
 use App\Models\Application;
 use App\Models\Candidate;
-use App\Models\Position;
-use App\Utils\ImageManger;
-use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
@@ -18,7 +17,18 @@ class ApplicationController extends Controller
      */
     public function index()
     {
-        $applications = Application::all();
+        $applications = QueryBuilder::for(Application::class)
+            ->allowedFilters(
+                'status',
+                'decision',
+                AllowedFilter::callback('name', function ($query, $value) {
+                    $query->whereHas('candidate', function ($q) use ($value) {
+                        $q->where('name', 'like', "%{$value}%");
+                    });
+                }),
+            )
+            ->allowedSorts('created_at', 'decision_date')
+            ->paginate();
 
         return apiResponse(200, 'Applications retrieved successfully', ApplicationResource::collection($applications));
     }
@@ -89,36 +99,28 @@ class ApplicationController extends Controller
         return apiResponse(200, 'Application deleted successfully', null);
     }
 
-    public function accept(Application $application)
+    public function decision(Application $application, string $decision)
     {
+        $decisions = [
+            'accept' => 'Accepted',
+            'reject' => 'Rejected',
+            'shortlist' => 'Shortlisted',
+        ];
+
+        if (! array_key_exists($decision, $decisions)) {
+            return apiResponse(422, 'Invalid decision');
+        }
+
         $application->update([
-            'status' => 'Accepted',
-            'decision' => 'Accepted',
+            'status' => $decisions[$decision],
+            'decision' => $decisions[$decision],
             'decision_date' => now(),
         ]);
 
-        return apiResponse(200, 'Application accepted successfully', new ApplicationResource($application));
-    }
-
-    public function reject(Application $application)
-    {
-        $application->update([
-            'status' => 'Rejected',
-            'decision' => 'Rejected',
-            'decision_date' => now(),
-        ]);
-
-        return apiResponse(200, 'Application rejected successfully', new ApplicationResource($application));
-    }
-
-    public function shortlist(Application $application)
-    {
-        $application->update([
-            'status' => 'Shortlisted',
-            'decision' => 'Shortlisted',
-            'decision_date' => now(),
-        ]);
-
-        return apiResponse(200, 'Application shortlisted successfully', new ApplicationResource($application));
+        return apiResponse(
+            200,
+            "Application {$decisions[$decision]} successfully",
+            new ApplicationResource($application)
+        );
     }
 }

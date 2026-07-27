@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cv_analyses', function (Blueprint $table) {
+        Schema::create('evaluations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('application_id')->constrained()->onDelete('cascade');
-            $table->integer('match_percentage')->nullable();
-            $table->string('experience_summary')->nullable();
-            $table->string('education_summary')->nullable();
+            $table->foreignId('interview_id')->constrained()->onDelete('cascade');
+            $table->decimal('overall_score', 10, 2);
+            $table->text('weaknesses')->nullable();
             $table->text('strengths')->nullable();
-            $table->text('gaps')->nullable();
+            $table->string('recording_url')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cv_analyses');
+        Schema::dropIfExists('evaluations');
     }
 };

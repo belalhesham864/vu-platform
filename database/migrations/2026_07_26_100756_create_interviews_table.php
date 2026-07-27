@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('application_id')->constrained()->onDelete('cascade');
             $table->foreignId('interviewer_id')->constrained('users')->onDelete('cascade');
-            $table->enum('interview_type', ['AI Interview', 'Technical Interview' , 'Final Interview'])->default('AI Interview');
-            $table->dateTime('interview_date');
-            $table->integer('score')->nullable();
-            $table->text('feedback')->nullable();
+            $table->dateTime('available_until');
+            $table->integer('estimated_duration');
+            $table->integer('question_count');
+            $table->enum('status', ['pending', 'accepted','expired', 'completed'])->default('pending');
             $table->timestamps();
         });
     }

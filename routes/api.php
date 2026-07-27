@@ -8,8 +8,16 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifayEmailController;
 use App\Http\Controllers\CandidateListController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\PositionStageController;
+use App\Http\Controllers\TeamMemberController;
 use Illuminate\Support\Facades\Route;
+
+
+
+
 
 
 
@@ -49,10 +57,13 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('positions', PositionController::class);
     Route::resource('applications', ApplicationController::class);
     Route::get('candidates' , CandidateListController::class);
+    Route::post('applications/{application}/{decision}', [ApplicationController::class, 'decision']);
     
-    Route::post('applications/{application}/accept', [ApplicationController::class, 'accept']);
-    Route::post('applications/{application}/reject', [ApplicationController::class, 'reject']);
-    Route::post('applications/{application}/shortlist', [ApplicationController::class, 'shortlist']);
+    Route::resource('interviews', InterviewController::class);
+    Route::resource('evaluations', EvaluationController::class);
+    Route::resource('position-stages', PositionStageController::class);
+    Route::get('team-members', [TeamMemberController::class, 'index']);
+    Route::post('team-members/invite', [TeamMemberController::class, 'invite']);
     
     Route::post('/logout', [LoginController::class, 'logout']);
 });

@@ -38,4 +38,9 @@ class Position extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function stages()
+    {
+        return $this->hasMany(PositionStage::class);
+    }
 }

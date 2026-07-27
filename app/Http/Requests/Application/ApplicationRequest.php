@@ -30,6 +30,9 @@ class ApplicationRequest extends FormRequest
             'decision' => 'nullable|string',
             'decision_date' => 'nullable|date',
             'start_date' => 'nullable|date',
+            'ai_score' => 'nullable|numeric|min:0|max:100',
+            'flags' => 'nullable|array',
+            'flags.*' => 'string',
             'approved_by' => 'nullable|exists:users,id',
         ];
     }

@@ -6,6 +6,7 @@ use App\Http\Requests\Position\PositionRequest;
 use App\Http\Resources\Position\PositionResource;
 use App\Models\Position;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 
 class PositionController extends Controller
@@ -15,7 +16,10 @@ class PositionController extends Controller
      */
     public function index()
     {
-        $positions = Position::all();
+        $positions = QueryBuilder::for(Position::class)
+            ->allowedFilters('title', 'description')
+            ->allowedSorts('created_at', 'updated_at')
+            ->paginate();
 
         return apiResponse(200, 'Positions retrieved successfully', $positions);
     }
@@ -35,8 +39,8 @@ class PositionController extends Controller
     {
         $user = Auth::user();
         $data = $request->validated();
-        $data['company_id'] = $user->company_id; // Assuming the user has a company_id attribute
-        $data['approved_by'] = $user->id; // Set the approved_by field to the current user's ID
+        $data['company_id'] = $user->company_id;
+        $data['approved_by'] = $user->id;
 
         $position = Position::create($data);
 
@@ -66,8 +70,8 @@ class PositionController extends Controller
     {
         $user = Auth::user();
         $data = $request->validated();
-        $data['company_id'] = $user->company_id; // Assuming the user has a company_id attribute
-        $data['approved_by'] = $user->id; // Set the approved_by field to the current user's ID
+        $data['company_id'] = $user->company_id;
+        $data['approved_by'] = $user->id;
 
         $position->update($data);
 
