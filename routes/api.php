@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\password\ForgetPasswordController;
 use App\Http\Controllers\Auth\password\ResetPasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifayEmailController;
+use App\Http\Controllers\MangmentTeamController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,3 +33,20 @@ Route::controller(ForgetPasswordController::class)->group(function () {
 
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:reset-password');
+
+    Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function(){
+        Route::get('/','show');
+        Route::put('/update','update');
+    });
+    Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix('team/')->group(function(){
+        Route::get('/','index');
+        Route::Post('/invite','invite');
+        Route::put('/update','update')->name('update');
+            Route::patch('/{user}', [MangmentTeamController::class, 'update']);
+            Route::post('/{id}/resend-invite', [MangmentTeamController::class, 'resendInvite']);
+            Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
+
+
+    });
+    Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
+    
