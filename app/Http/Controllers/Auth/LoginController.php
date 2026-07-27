@@ -13,15 +13,13 @@ class LoginController extends Controller
     public function login(LoginRequest $request)
     {
         $data = $request->validated();
-        $user = auth()->user();
         $token = Auth::guard('api')->attempt($data);
-        if (!$user->email_verified_at) {
-            auth()->logout();
-            return apiResponse(403 ,'Please verify your email first.');
-        }
-        if (!$token) {
+             if (!$token) {
             return apiResponse(401, 'Unauthorized');
         }
+        $user = auth()->user();
+
+   
         return apiResponse(200, 'Login Success', ['user' => new UserResource($user), 'token' => $token]);
     }
     public function logout()
