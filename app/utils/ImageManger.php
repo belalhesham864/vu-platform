@@ -31,12 +31,11 @@ class ImageManger
     }
 
 
-    public static function delete($model)
+    public static function delete($path)
     {
-        $imagePath = str_replace(asset('/'), '', $model->image);
 
-        if (File::exists(public_path($imagePath))) {
-            File::delete(public_path($imagePath));
+        if (File::exists(public_path('uploads/'.$path))) {
+            File::delete(public_path('uploads/'.$path));
         }
     }
 }
