@@ -23,7 +23,7 @@ class ApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'candidate_id' => 'required|exists:candidates,id',
+            'candidate_id' => 'required|exists:candidates,id',
             'position_id' => 'required|exists:positions,id',
             'application_type' => 'required|in:AI Interview,Technical Interview,Final Interview',
             'status' => 'required|in:Under Review,Scheduled,Shortlisted,Accepted,Rejected',

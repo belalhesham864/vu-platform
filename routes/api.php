@@ -6,10 +6,11 @@ use App\Http\Controllers\Auth\password\ForgetPasswordController;
 use App\Http\Controllers\Auth\password\ResetPasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifayEmailController;
-use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CandidateListController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PositionController;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -47,11 +48,11 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('positions', PositionController::class);
     Route::resource('applications', ApplicationController::class);
-    Route::get('candidates' , [CandidateController::class, 'index']);
+    Route::get('candidates' , CandidateListController::class);
     
     Route::post('applications/{application}/accept', [ApplicationController::class, 'accept']);
     Route::post('applications/{application}/reject', [ApplicationController::class, 'reject']);
     Route::post('applications/{application}/shortlist', [ApplicationController::class, 'shortlist']);
     
-    Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:api');
+    Route::post('/logout', [LoginController::class, 'logout']);
 });
