@@ -4,10 +4,11 @@ namespace App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Company extends Model
-{    
-    use Sluggable;
+{
+    use Sluggable, HasFactory;
 protected $fillable = ['company_name','slug','industry','location','about','phone','logo','website','company_size','status'];
         public function sluggable(): array
     {
