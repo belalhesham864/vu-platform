@@ -19,6 +19,19 @@ class LoginController extends Controller
     $token = Auth::guard('api')->attempt($data);
     if (!$token) {
       return apiResponse(401, 'Unauthorized');
+
+    public function login(LoginRequest $request)
+    {
+        $data = $request->validated();
+        $token = Auth::guard('api')->attempt($data);
+             if (!$token) {
+            return apiResponse(401, 'Unauthorized');
+        }
+        $user = auth()->user();
+
+   
+        return apiResponse(200, 'Login Success', ['user' => new UserResource($user), 'token' => $token]);
+
     }
 
     $user = auth('api')->user();

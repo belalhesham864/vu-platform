@@ -13,6 +13,9 @@ use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\MangmentTeamController;
+use App\Http\Controllers\SettingController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -47,7 +50,6 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:reset-password');
 
 
-
 Route::post('/register-candidate', [RegisterController::class, 'registerCandidate'])->middleware('throttle:register');
 Route::post('/login-candidate', [LoginController::class, 'loginCandidate'])->middleware('throttle:login');
 
@@ -66,3 +68,19 @@ Route::middleware('auth:api')->group(function () {
     
     Route::post('/logout', [LoginController::class, 'logout']);
 });
+
+    Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function(){
+        Route::get('/','show');
+        Route::put('/update','update');
+    });
+    Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix('team/')->group(function(){
+        Route::get('/','index');
+        Route::Post('/invite','invite');
+        Route::put('/update','update')->name('update');
+            Route::patch('/{user}', [MangmentTeamController::class, 'update']);
+            Route::post('/{id}/resend-invite', [MangmentTeamController::class, 'resendInvite']);
+            Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
+
+
+    });
+    Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
