@@ -24,7 +24,7 @@ class CandidateService
         $token = Auth::guard('candidate')->login($candidate);
 
         if (!$token) {
-            return apiResponse(401, "Unauthorized");
+            return false;
         }
 
         return [

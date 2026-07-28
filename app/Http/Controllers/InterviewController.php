@@ -7,6 +7,8 @@ use App\Http\Resources\Interview\InterviewResource;
 use App\Models\Interview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class InterviewController extends Controller
 {
@@ -15,9 +17,32 @@ class InterviewController extends Controller
      */
     public function index()
     {
-        $interviews = Interview::with('application', 'interviewer')->paginate();
+        $interviews = QueryBuilder::for(Interview::class)
+            ->with(['application.candidate', 'application.position', 'interviewer'])
+            ->allowedFilters(
+                AllowedFilter::callback('candidate', function ($query, $value) {
+                    $query->whereHas('application.candidate', function ($q) use ($value) {
+                        $q->where('name', 'like', "%{$value}%");
+                    });
+                }),
 
-        return apiResponse(200, 'Success', InterviewResource::collection($interviews));
+                AllowedFilter::callback('position', function ($query, $value) {
+                    $query->whereHas('application.position', function ($q) use ($value) {
+                        $q->where('title', 'like', "%{$value}%");
+                    });
+                }),
+
+                AllowedFilter::callback('status', function ($query, $value) {
+                    $query->whereHas('application', function ($q) use ($value) {
+                        $q->where('status', $value);
+                    });
+                })
+
+            )
+            ->paginate();
+
+        return apiResponse(200, 'Success', $interviews);
+        // return apiResponse(200, 'Success', InterviewResource::collection($interviews));
     }
 
     /**

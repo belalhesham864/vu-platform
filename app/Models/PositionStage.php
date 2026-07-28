@@ -8,9 +8,9 @@ class PositionStage extends Model
 {
     protected $fillable = [
         'position_id',
-        'name',
-        'description',
-        'order',
+        'stage_name',
+        'stage_order',
+        'is_active',
     ];
 
     public function position()

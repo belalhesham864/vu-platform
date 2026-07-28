@@ -63,7 +63,6 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('evaluations', EvaluationController::class);
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
-    Route::post('team-members/invite', [TeamMemberController::class, 'invite']);
     
     Route::post('/logout', [LoginController::class, 'logout']);
 });

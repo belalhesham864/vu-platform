@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Stage\StageRequest;
+use App\Http\Resources\Stage\StageResource;
 use App\Models\PositionStage;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class PositionStageController extends Controller
 {
@@ -14,7 +18,7 @@ class PositionStageController extends Controller
     {
         $stages = PositionStage::with('position')->paginate();
 
-        return apiResponse(200, 'Success', $stages);
+        return apiResponse(200, 'Success', StageResource::collection($stages));
     }
 
     /**
@@ -28,14 +32,9 @@ class PositionStageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StageRequest $request)
     {
-        $validated = $request->validate([
-            'position_id' => 'required|exists:positions,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order' => 'required|integer|min:1',
-        ]);
+        $validated = $request->validated();
 
         $stage = PositionStage::create($validated);
 
@@ -47,7 +46,7 @@ class PositionStageController extends Controller
      */
     public function show(PositionStage $positionStage)
     {
-        return apiResponse(200, 'Success', $positionStage->load('position'));
+        return apiResponse(200, 'Success', new StageResource($positionStage));
     }
 
     /**
@@ -61,14 +60,9 @@ class PositionStageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PositionStage $positionStage)
+    public function update(StageRequest $request, PositionStage $positionStage)
     {
-        $validated = $request->validate([
-            'position_id' => 'sometimes|exists:positions,id',
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'order' => 'sometimes|integer|min:1',
-        ]);
+        $validated = $request->validated();
 
         $positionStage->update($validated);
 
