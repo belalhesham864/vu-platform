@@ -18,7 +18,7 @@ class VerifayEmailController extends Controller
     {
         $data = $request->validate(['token' => 'required']);
         try {
-            $user = auth()->user();
+            $user = auth('api')->user();
             $check = $this->otp->validate($user->email, $data['token']);
 
             if (!$check->status) {

@@ -15,7 +15,7 @@ return [
     |
     */
 
-   'defaults' => [
+    'defaults' => [
         'guard' => 'api',
         'passwords' => 'users',
     ],
@@ -46,6 +46,11 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
+
+        'candidate' => [
+            'driver' => 'jwt',
+            'provider' => 'candidates',
+        ],
     ],
 
     /*
@@ -70,6 +75,12 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
+
+        'candidates' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Candidate::class,
+        ],
+
 
         // 'users' => [
         //     'driver' => 'database',
