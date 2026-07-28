@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\VerifayEmailController;
 use App\Http\Controllers\CandidateListController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
@@ -24,7 +25,8 @@ use Illuminate\Support\Facades\Route;
 
 
 
-
+Route::get('Home/state',[HomeController::class,'state']);
+Route::post('Home/subscribers',[HomeController::class,'subscriber']);
 
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:register');
 
@@ -60,12 +62,12 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('applications', ApplicationController::class);
     Route::get('candidates' , CandidateListController::class);
     Route::post('applications/{application}/{decision}', [ApplicationController::class, 'decision']);
-    
+
     Route::resource('interviews', InterviewController::class);
     Route::resource('evaluations', EvaluationController::class);
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
-    
+
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
