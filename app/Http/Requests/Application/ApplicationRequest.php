@@ -23,10 +23,12 @@ class ApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'candidate_id' => 'required|exists:candidates,id',
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'cv_file' => 'nullable',
+
             'position_id' => 'required|exists:positions,id',
-            'application_type' => 'required|in:AI Interview,Technical Interview,Final Interview',
-            'status' => 'required|in:Under Review,Scheduled,Shortlisted,Accepted,Rejected',
             'decision' => 'nullable|string',
             'decision_date' => 'nullable|date',
             'start_date' => 'nullable|date',

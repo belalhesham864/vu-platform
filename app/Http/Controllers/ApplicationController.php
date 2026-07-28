@@ -6,9 +6,10 @@ use App\Http\Requests\Application\ApplicationRequest;
 use App\Http\Resources\Application\ApplicationResource;
 use App\Models\Application;
 use App\Models\Candidate;
-use Spatie\QueryBuilder\QueryBuilder;
-use Spatie\QueryBuilder\AllowedFilter;
+use App\Utils\ImageManger;
 use Illuminate\Support\Facades\Auth;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ApplicationController extends Controller
 {
@@ -48,11 +49,25 @@ class ApplicationController extends Controller
     {
         $company = Auth::guard('api')->user();
         $validatedData = $request->validated();
-        $candidateId = Candidate::findOrFail($validatedData['candidate_id']);
-        $validatedData['candidate_id'] = $candidateId->id;
         $validatedData['approved_by'] = $company->id;
 
-        $application = Application::create($validatedData);
+
+        if ($request->hasFile('cv_file')) {
+            $validatedData['cv_file'] = ImageManger::uploadImage($request, 'cv_file');
+        }
+
+        $candidate = Candidate::firstOrCreate([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'phone' => $validatedData['phone'],
+            'cv_file' => $validatedData['cv_file'],
+        ]);
+
+        $application = Application::create([
+            'candidate_id' => $candidate->id,
+            'position_id' => $validatedData['position_id'],
+            'approved_by' => $company->id,
+        ]);
 
         return apiResponse(201, 'Application created successfully', new ApplicationResource($application));
     }

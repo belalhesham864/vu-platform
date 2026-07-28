@@ -18,7 +18,7 @@ class InterviewController extends Controller
     public function index()
     {
         $interviews = QueryBuilder::for(Interview::class)
-            ->with(['application.candidate', 'application.position', 'interviewer'])
+            ->with(['application.candidate', 'application.position', 'interviewer' , 'slot'])
             ->allowedFilters(
                 AllowedFilter::callback('candidate', function ($query, $value) {
                     $query->whereHas('application.candidate', function ($q) use ($value) {
@@ -37,7 +37,6 @@ class InterviewController extends Controller
                         $q->where('status', $value);
                     });
                 })
-
             )
             ->paginate();
 

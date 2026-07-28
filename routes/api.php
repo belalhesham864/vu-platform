@@ -10,13 +10,17 @@ use App\Http\Controllers\CandidateListController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\InterviewReschedulesController;
+use App\Http\Controllers\InterviewSlotsController;
+use App\Http\Controllers\MangmentTeamController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
-use App\Http\Controllers\TeamMemberController;
-use App\Http\Controllers\MangmentTeamController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\TeamMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
 
 
 
@@ -61,7 +65,20 @@ Route::middleware('auth:api')->group(function () {
     Route::get('candidates' , CandidateListController::class);
     Route::post('applications/{application}/{decision}', [ApplicationController::class, 'decision']);
     
+    Route::get('interviews/{interview}/slots', [InterviewSlotsController::class, 'index']);
+    Route::post('interview-slots', [InterviewSlotsController::class, 'store']);
+    Route::put('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'update']);
+    Route::get('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'show']);
+    Route::get('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'destroy']);
+
     Route::resource('interviews', InterviewController::class);
+
+    Route::get('interviews/{slotId}/reschedules', [InterviewReschedulesController::class, 'index']);
+    Route::post('interview-reschedules', [InterviewSlotsController::class, 'store']);
+    Route::put('interview-reschedules/{interviewReschedule}', [InterviewReschedulesController::class, 'update']);
+    Route::get('interview-reschedules/{id}', [InterviewReschedulesController::class, 'show']);
+    Route::delete('interview-reschedules/{interviewReschedule}', [InterviewReschedulesController::class, 'destroy']);
+
     Route::resource('evaluations', EvaluationController::class);
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);

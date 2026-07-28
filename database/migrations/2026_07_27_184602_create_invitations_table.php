@@ -21,9 +21,6 @@ return new class extends Migration
             $table->string('user_email');
 
             $table->string('role');
-
-            // $table->string('token')->unique();
-
             $table->enum('status', [
                 'pending',
                 'accepted',

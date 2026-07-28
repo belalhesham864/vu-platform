@@ -24,4 +24,14 @@ class Interview extends Model
     {
         return $this->belongsTo(User::class, 'interviewer_id');
     }
+
+    public function slots()
+    {
+        return $this->hasMany(InterviewSlot::class);
+    }
+
+    public function reschedule()
+    {
+        return $this->hasMany(InterviewReschedule::class);
+    }
 }

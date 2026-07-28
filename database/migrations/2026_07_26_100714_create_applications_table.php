@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('candidate_id')->constrained()->onDelete('cascade');
             $table->foreignId('position_id')->constrained()->onDelete('cascade');
-            $table->enum('application_type', ['AI Interview', 'Technical Interview' , 'Final Interview'])->default('AI Interview');
+            $table->foreignId('candidate_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['Under Review', 'Scheduled','Shortlisted' , 'Accepted', 'Rejected'])->default('Under Review');
             $table->string('decision')->nullable();
             $table->date('decision_date')->nullable();

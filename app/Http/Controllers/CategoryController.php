@@ -13,7 +13,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::paginate();
 
         return apiResponse(200, 'Categories retrieved successfully', $categories);
     }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Interview;
+namespace App\Http\Requests\Slot;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class InterviewRequest extends FormRequest
+class SlotRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,12 +23,10 @@ class InterviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'application_id' => ['required', 'exists:applications,id'],
-            'available_until' => ['required', 'date'],
-            'estimated_duration' => ['required', 'integer'],
-            'interview_slot_id'=> ['required|exists:interview_slots,id'],
-            'question_count' => ['required', 'integer'],
-            'status' => ['required', 'in:pending,accepted,expired,completed'],
+            'application_id' => 'required|exists:applications,id',
+            'date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ];
     }
 }

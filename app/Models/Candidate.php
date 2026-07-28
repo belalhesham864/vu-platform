@@ -12,7 +12,6 @@ class Candidate extends Authenticatable implements JWTSubject
         'name',
         'email',
         'phone',
-        'password',
         'cv_file',
     ];
 
