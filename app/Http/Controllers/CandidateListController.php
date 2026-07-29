@@ -16,6 +16,9 @@ class CandidateListController extends Controller
      */
     public function __invoke(Request $request)
     {
+        if (!auth()->user()->can('view_candidates')) {
+            return apiResponse(403 , 'You Can Not View Any Candidate');
+        }
         $company = Auth::guard('api')->user()->company;
 
         $candidates = QueryBuilder::for(Candidate::class)

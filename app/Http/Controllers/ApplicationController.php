@@ -6,7 +6,7 @@ use App\Http\Requests\Application\ApplicationRequest;
 use App\Http\Resources\Application\ApplicationResource;
 use App\Models\Application;
 use App\Models\Candidate;
-use App\Utils\ImageManger;
+use App\Services\Applications\ApplicationService;
 use Illuminate\Support\Facades\Auth;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -18,6 +18,10 @@ class ApplicationController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->can('view_application')) {
+            return apiResponse(403 , 'You Can Not View Applications');
+        }
+
         $applications = QueryBuilder::for(Application::class)
             ->allowedFilters(
                 'status',
@@ -45,31 +49,25 @@ class ApplicationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ApplicationRequest $request)
+    public function store(ApplicationRequest $request, ApplicationService $applicationService)
     {
-        $company = Auth::guard('api')->user();
-        $validatedData = $request->validated();
-        $validatedData['approved_by'] = $company->id;
-
-
-        if ($request->hasFile('cv_file')) {
-            $validatedData['cv_file'] = ImageManger::uploadImage($request, 'cv_file');
+        if (!auth()->user()->can('create_application')) {
+            return apiResponse(403 , 'You Can Not Create Applications');
         }
 
-        $candidate = Candidate::firstOrCreate([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'phone' => $validatedData['phone'],
-            'cv_file' => $validatedData['cv_file'],
-        ]);
+        try {
+            $company = Auth::guard('api')->user();
 
-        $application = Application::create([
-            'candidate_id' => $candidate->id,
-            'position_id' => $validatedData['position_id'],
-            'approved_by' => $company->id,
-        ]);
+            $application = $applicationService->create($request->validated(), $request, $company);
 
-        return apiResponse(201, 'Application created successfully', new ApplicationResource($application));
+            return apiResponse(
+                201,
+                'Application created successfully',
+                new ApplicationResource($application)
+            );
+        } catch (\Exception $e) {
+            return apiResponse(500, $e->getMessage());
+        }
     }
 
     /**
@@ -93,6 +91,10 @@ class ApplicationController extends Controller
      */
     public function update(ApplicationRequest $request, Application $application)
     {
+        if (!auth()->user()->can('edit_application')) {
+            return apiResponse(403 , 'You Can Not Edit Applications');
+        }
+
         $company = Auth::guard('api')->user();
         $validatedData = $request->validated();
         $candidateId = Candidate::findOrFail($validatedData['candidate_id']);
@@ -109,6 +111,10 @@ class ApplicationController extends Controller
      */
     public function destroy(Application $application)
     {
+        if (!auth()->user()->can('delete_application')) {
+            return apiResponse(403 , 'You Can Not Delete Applications');
+        }
+
         $application->delete();
 
         return apiResponse(200, 'Application deleted successfully', null);

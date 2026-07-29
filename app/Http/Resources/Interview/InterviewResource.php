@@ -17,6 +17,10 @@ class InterviewResource extends JsonResource
         return [
             'id' => $this->id,
             'application_id' => $this->application_id,
+            'job_title' => $this->application?->position?->title,
+            'candidate_name' => $this->application?->candidate?->name,
+            'candidate_email' => $this->application?->candidate?->email,
+            'candidate_cv' => $this->application?->candidate?->cv_file,
             'interviewer_id' => $this->interviewer_id,
             'available_until' => $this->available_until,
             'estimated_duration' => $this->estimated_duration,

@@ -17,8 +17,12 @@ class InterviewController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->can('view_interviews')) {
+            return apiResponse(403 , 'You Can Not View Interviews');
+        }
+
         $interviews = QueryBuilder::for(Interview::class)
-            ->with(['application.candidate', 'application.position', 'interviewer' , 'slot'])
+            ->with(['application.candidate', 'application.position', 'interviewer' , 'slots'])
             ->allowedFilters(
                 AllowedFilter::callback('candidate', function ($query, $value) {
                     $query->whereHas('application.candidate', function ($q) use ($value) {
@@ -39,9 +43,8 @@ class InterviewController extends Controller
                 })
             )
             ->paginate();
-
-        return apiResponse(200, 'Success', $interviews);
-        // return apiResponse(200, 'Success', InterviewResource::collection($interviews));
+            
+        return apiResponse(200, 'Success', InterviewResource::collection($interviews));
     }
 
     /**
@@ -57,6 +60,10 @@ class InterviewController extends Controller
      */
     public function store(InterviewRequest $request)
     {
+        if (!auth()->user()->can('create_interview')) {
+            return apiResponse(403 , 'You Can Not Create Interview');
+        }
+
         $interviewer = Auth::user();
         $validated = $request->validated();
 
@@ -88,6 +95,10 @@ class InterviewController extends Controller
      */
     public function update(InterviewRequest $request, Interview $interview)
     {
+        if (!auth()->user()->can('edit_interview')) {
+            return apiResponse(403 , 'You Can Not Edit Interview');
+        }
+
         $validated = $request->validated();
 
         $interview->update($validated);
@@ -100,6 +111,10 @@ class InterviewController extends Controller
      */
     public function destroy(Interview $interview)
     {
+        if (!auth()->user()->can('delete_interview')) {
+            return apiResponse(403 , 'You Can Not Delete Interview');
+        }
+
         $interview->delete();
 
         return apiResponse(200, 'Interview deleted successfully', null);

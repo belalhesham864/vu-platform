@@ -15,6 +15,10 @@ class EvaluationController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->can('view_evaluations')) {
+            return apiResponse(403 , 'You Can Not Crwate Job');
+        }
+
         $evaluations = Evaluation::with('answers', 'application')->paginate();
 
         return apiResponse(200, 'Success', EvaluationResource::collection($evaluations));
@@ -33,11 +37,15 @@ class EvaluationController extends Controller
      */
     public function store(EvaluationRequest $request)
     {
+        if (!auth()->user()->can('create_evaluation')) {
+            return apiResponse(403 , 'You Can Not Create Evaluation');
+        }
+
         $validated = $request->validated();
 
-        DB::beginTransaction();
-
         try {
+
+            DB::beginTransaction();
 
             $evaluation = Evaluation::create([
                 'application_id' => $validated['application_id'],
@@ -93,6 +101,10 @@ class EvaluationController extends Controller
      */
     public function update(EvaluationRequest $request, Evaluation $evaluation)
     {
+        if (!auth()->user()->can('edit_evaluation')) {
+            return apiResponse(403 , 'You Can Not Edit Evaluation');
+        }
+
         $validated = $request->validated();
 
         $evaluation->update($validated);
@@ -105,6 +117,10 @@ class EvaluationController extends Controller
      */
     public function destroy(Evaluation $evaluation)
     {
+        if (!auth()->user()->can('delete_evaluation')) {
+            return apiResponse(403 , 'You Can Not Delete Evaluation');
+        }
+
         $evaluation->delete();
 
         return apiResponse(200, 'Deleted successfully', new EvaluationResource($evaluation));

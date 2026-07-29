@@ -13,6 +13,9 @@ class CategoryController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->can('view_categories')) {
+            return apiResponse(403 , 'You Can Not View Category');
+        }
         $categories = Category::paginate();
 
         return apiResponse(200, 'Categories retrieved successfully', $categories);
@@ -31,6 +34,10 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
+        if (!auth()->user()->can('create_category')) {
+            return apiResponse(403 , 'You Can Not Create Category');
+        }
+
         $category = Category::create($request->validated());
 
         return apiResponse(201, 'Category created successfully', $category);
@@ -57,6 +64,10 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
+        if (!auth()->user()->can('edit_category')) {
+            return apiResponse(403 , 'You Can Not Edit Category');
+        }
+
         $category->update($request->validated());
 
         return apiResponse(200, 'Category updated successfully', $category);
@@ -67,6 +78,10 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        if (!auth()->user()->can('delete_category')) {
+            return apiResponse(403 , 'You Can Not Delete Category');
+        }
+
         $category->delete();
 
         return apiResponse(200, 'Category deleted successfully', null);

@@ -14,7 +14,7 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-            $roles = [
+        $roles = [
             'Owner',
             'Admin',
             'HR',
@@ -28,48 +28,65 @@ class RoleSeeder extends Seeder
                 'guard_name' => 'api',
             ]);
         }
-           $permissions = [
-        'manage_company_settings',
-        'manage_team_members',
-        'create_job',
-        'edit_job',
-        'delete_job',
-        'view_candidates',
-        'manage_candidates',
-        'schedule_interview',
-        'conduct_interview',
-        'submit_feedback',
-        'view_analytics',
-    ];
+        $permissions = [
+            'manage_company_settings',
+            'manage_team_members',
+            'view_jobs',
+            'create_job',
+            'edit_job',
+            'delete_job',
+            'view_candidates',
+            'manage_candidates',
+            'schedule_interview',
+            'conduct_interview',
+            'submit_feedback',
+            'view_analytics',
+            'view_applications',
+            'create_application',
+            'edit_application',
+            'delete_application',
+            'view_categories',
+            'create_category',
+            'edit_category',
+            'delete_category',
+            'view_evaluations',
+            'create_evaluation',
+            'edit_evaluation',
+            'delete_evaluation',
+        ];
         foreach ($permissions as $permission) {
-        Permission::firstOrCreate([
-            'name' => $permission,
-            'guard_name' => 'api',
-        ]);
-    }
-    Role::findByName('Owner','api')->givePermissionTo(Permission::all());
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'api',
+            ]);
+        }
+        Role::findByName('Owner', 'api')->givePermissionTo(Permission::all());
         Role::findByName('Admin', 'api')->givePermissionTo([
-        'manage_company_settings',
-        'manage_team_members',
-        'create_job', 'edit_job', 'delete_job',
-        'view_candidates', 'manage_candidates',
-        'view_analytics',
-    ]);
+            'manage_company_settings',
+            'manage_team_members',
+            'create_job',
+            'edit_job',
+            'delete_job',
+            'view_candidates',
+            'manage_candidates',
+            'view_analytics',
+        ]);
         Role::findByName('HR', 'api')->givePermissionTo([
-        'create_job', 'edit_job',
-        'view_candidates', 'manage_candidates',
-        'schedule_interview',
-    ]);
+            'create_job',
+            'edit_job',
+            'view_candidates',
+            'manage_candidates',
+            'schedule_interview',
+        ]);
         Role::findByName('HR Interviewer', 'api')->givePermissionTo([
-        'view_candidates',
-        'conduct_interview',
-        'submit_feedback',
-    ]);
-      Role::findByName('Technical Interviewer', 'api')->givePermissionTo([
-        'view_candidates',
-        'conduct_interview',
-        'submit_feedback',
-    ]);
-    
+            'view_candidates',
+            'conduct_interview',
+            'submit_feedback',
+        ]);
+        Role::findByName('Technical Interviewer', 'api')->givePermissionTo([
+            'view_candidates',
+            'conduct_interview',
+            'submit_feedback',
+        ]);
     }
 }

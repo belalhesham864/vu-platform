@@ -26,7 +26,7 @@ class InterviewRequest extends FormRequest
             'application_id' => ['required', 'exists:applications,id'],
             'available_until' => ['required', 'date'],
             'estimated_duration' => ['required', 'integer'],
-            'interview_slot_id'=> ['required|exists:interview_slots,id'],
+            'interview_slot_id'=> ['required','exists:interview_slots,id'],
             'question_count' => ['required', 'integer'],
             'status' => ['required', 'in:pending,accepted,expired,completed'],
         ];
