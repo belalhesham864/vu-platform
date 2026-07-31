@@ -118,3 +118,28 @@ return apiResponse(422, 'Invalid or expired token');
 
     }
 }
+
+
+// https://apitest.myfatoorah.com/v2/SendPayment   
+// SK_KWT_vVZlnnAqu8jRByOWaRPNId4ShzEDNt256dvnjebuyzo52dXjAfRx2ixW5umjWSUx
+// $postFields = [
+//     //Fill required data
+//     'InvoiceValue'       => $invoiceValue,
+//     'CustomerName'       => 'fname lname',
+//     'NotificationOption' => 'LNK', //'SMS', 'EML', or 'ALL'
+//         //Fill optional data
+//         //'DisplayCurrencyIso' => $displayCurrencyIso,
+//         //'MobileCountryCode'  => $phone[0],
+//         //'CustomerMobile'     => $phone[1],
+//         //'CustomerEmail'      => 'email@example.com',
+//         //'CallBackUrl'        => 'https://example.com/callback.php',
+//         //'ErrorUrl'           => 'https://example.com/callback.php', //or 'https://example.com/error.php'
+//         //'Language'           => 'en', //or 'ar'
+//         //'CustomerReference'  => 'orderId',
+//         //'CustomerCivilId'    => 'CivilId',
+//         //'UserDefinedField'   => 'This could be string, number, or array',
+//         //'ExpiryDate'         => '', //The Invoice expires after 3 days by default. Use 'Y-m-d\TH:i:s' format in the 'Asia/Kuwait' time zone.
+//         //'CustomerAddress'    => $customerAddress,
+//         //'InvoiceItems'       => $invoiceItems,
+//         //'Suppliers'          => $suppliers,
+// ];

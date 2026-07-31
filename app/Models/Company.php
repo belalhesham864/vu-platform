@@ -2,9 +2,8 @@
 
 namespace App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
-
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
@@ -29,6 +28,15 @@ protected $fillable = ['company_name','slug','industry','location','about','phon
     public function owner()
 {
     return $this->hasOne(User::class)->role('Owner');
+}
+public function subscriptions()
+{
+    return $this->hasMany(subscriptions::class);
+}
+
+public function payments()
+{
+    return $this->hasMany(payments::class);
 }
 
 }

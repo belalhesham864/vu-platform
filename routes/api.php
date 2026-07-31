@@ -15,6 +15,8 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\MangmentTeamController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -86,3 +88,9 @@ Route::middleware('auth:api')->group(function () {
 
     });
     Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
+
+Route::get('/plans', [PlanController::class, 'index']);
+Route::get('/plans/{plan}', [PlanController::class, 'show']);
+
+Route::post('payments/create',[PaymentController::class,'create'])->middleware('auth:api');
+Route::post('/payments/webhook', [PaymentController::class, 'webhook']);

@@ -26,24 +26,5 @@ class RegisterController extends Controller
   }
 
 
-  public function registerCandidate(RegisterCandidateRequest $request, CandidateService $candidateService)
-  {
-    try {
-      $data = $candidateService->registerCandidate($request);
 
-      return apiResponse(200, 'Created', [
-        'user' => $data['user'],
-        'authorization' => [
-          'token' => $data['token'],
-          'type' => 'Bearer',
-        ],
-      ]);
-    } catch (\Exception $e) {
-      
-        return apiResponse(
-          $e->getCode() ?: 500,
-          $e->getMessage()
-        );
-    }
-  }
 }
