@@ -1,3 +1,6 @@
+
+version: '3.8'
+
 services:
   app:
     build:
@@ -23,13 +26,15 @@ services:
     container_name: vu-platform-web
     restart: unless-stopped
     ports:
-      - "80:80"   # منفذ HTTP
-      - "443:443" # منفذ HTTPS
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./:/var/www/public # تم التأكد من هذا المسار
+      - ./:/var/www/public
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - certbot-etc:/etc/letsencrypt # إضافة جديدة لشهادات SSL
-      - certbot-var:/var/lib/letsencrypt # إضافة جديدة لبيانات Certbot
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - ./certbot/conf/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - ./certbot/conf/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
     networks:
       - vu-platform-network
     depends_on:
@@ -62,7 +67,11 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
-      - ./:/var/www/public # تم التعديل هنا ليتطابق مع ما تم ربطه في خدمة web
+      - ./certbot/conf/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - ./certbot/conf/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
+      - ./:/var/www/public # This matches the Nginx root for acme-challenge
+    networks:
+      - vu-platform-network
     depends_on:
       - web
     command: "certbot renew --webroot -w /var/www/public --post-hook \"nginx -s reload\""
