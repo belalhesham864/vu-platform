@@ -60,8 +60,8 @@ class RoleSeeder extends Seeder
                 'guard_name' => 'api',
             ]);
         }
-        Role::findByName('Owner', 'api')->givePermissionTo(Permission::all());
-        Role::findByName('Admin', 'api')->givePermissionTo([
+        Role::findByName('Owner', 'api')->syncPermissions(Permission::all());
+        Role::findByName('Admin', 'api')->syncPermissions([
             'manage_company_settings',
             'manage_team_members',
             'create_job',
@@ -71,19 +71,19 @@ class RoleSeeder extends Seeder
             'manage_candidates',
             'view_analytics',
         ]);
-        Role::findByName('HR', 'api')->givePermissionTo([
+        Role::findByName('HR', 'api')->syncPermissions([
             'create_job',
             'edit_job',
             'view_candidates',
             'manage_candidates',
             'schedule_interview',
         ]);
-        Role::findByName('HR Interviewer', 'api')->givePermissionTo([
+        Role::findByName('HR Interviewer', 'api')->syncPermissions([
             'view_candidates',
             'conduct_interview',
             'submit_feedback',
         ]);
-        Role::findByName('Technical Interviewer', 'api')->givePermissionTo([
+        Role::findByName('Technical Interviewer', 'api')->syncPermissions([
             'view_candidates',
             'conduct_interview',
             'submit_feedback',

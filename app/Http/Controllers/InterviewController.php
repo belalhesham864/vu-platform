@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Interview\InterviewRequest;
 use App\Http\Resources\Interview\InterviewResource;
+use App\Models\Candidate;
 use App\Models\Interview;
+use App\Models\User;
+use App\Notifications\InterviewInvitationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class InterviewController extends Controller
 {
@@ -18,11 +22,11 @@ class InterviewController extends Controller
     public function index()
     {
         if (!auth()->user()->can('view_interviews')) {
-            return apiResponse(403 , 'You Can Not View Interviews');
+            return apiResponse(403, 'You Can Not View Interviews');
         }
 
         $interviews = QueryBuilder::for(Interview::class)
-            ->with(['application.candidate', 'application.position', 'interviewer' , 'slots'])
+            ->with(['application.candidate', 'application.position', 'interviewer', 'slots'])
             ->allowedFilters(
                 AllowedFilter::callback('candidate', function ($query, $value) {
                     $query->whereHas('application.candidate', function ($q) use ($value) {
@@ -43,7 +47,7 @@ class InterviewController extends Controller
                 })
             )
             ->paginate();
-            
+
         return apiResponse(200, 'Success', InterviewResource::collection($interviews));
     }
 
@@ -61,17 +65,34 @@ class InterviewController extends Controller
     public function store(InterviewRequest $request)
     {
         if (!auth()->user()->can('create_interview')) {
-            return apiResponse(403 , 'You Can Not Create Interview');
+            return apiResponse(403, 'You Can Not Create Interview');
         }
 
         $interviewer = Auth::user();
-        $validated = $request->validated();
 
-        $validated['interviewer_id'] = $interviewer->id;
+        try {
+            $interview = DB::transaction(function () use ($request, $interviewer) {
 
-        $interview = Interview::create($validated);
+                $validated = $request->validated();
+                $validated['interviewer_id'] = $interviewer->id;
 
-        return apiResponse(201, 'Interview created successfully', new InterviewResource($interview));
+                $interview = Interview::create($validated);
+
+                $candidate = $interview->application->candidate;
+
+                $candidate->notify(new InterviewInvitationNotification($interview));
+
+                return $interview;
+            });
+
+            return apiResponse(
+                201,
+                'Interview created successfully',
+                new InterviewResource($interview)
+            );
+        } catch (\Throwable $e) {
+            return apiResponse(500, $e->getMessage());
+        }
     }
 
     /**
@@ -96,7 +117,7 @@ class InterviewController extends Controller
     public function update(InterviewRequest $request, Interview $interview)
     {
         if (!auth()->user()->can('edit_interview')) {
-            return apiResponse(403 , 'You Can Not Edit Interview');
+            return apiResponse(403, 'You Can Not Edit Interview');
         }
 
         $validated = $request->validated();
@@ -112,7 +133,7 @@ class InterviewController extends Controller
     public function destroy(Interview $interview)
     {
         if (!auth()->user()->can('delete_interview')) {
-            return apiResponse(403 , 'You Can Not Delete Interview');
+            return apiResponse(403, 'You Can Not Delete Interview');
         }
 
         $interview->delete();

@@ -24,5 +24,4 @@ class RegisterController extends Controller
   {
     return $register->Register($request);
   }
-
 }

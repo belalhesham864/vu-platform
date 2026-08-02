@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Models;
+use App\Models\Position;
 use Cviebrock\EloquentSluggable\Sluggable;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
-{    
-    use Sluggable;
+{
+    use Sluggable, HasFactory;
 protected $fillable = ['company_name','slug','industry','location','about','phone','logo','website','company_size','status'];
         public function sluggable(): array
     {
@@ -28,6 +29,16 @@ protected $fillable = ['company_name','slug','industry','location','about','phon
     public function owner()
 {
     return $this->hasOne(User::class)->role('Owner');
+}
+
+public function subscriptions()
+{
+    return $this->hasMany(subscriptions::class);
+}
+
+public function payments()
+{
+    return $this->hasMany(payments::class);
 }
 
 }

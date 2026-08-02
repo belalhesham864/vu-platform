@@ -9,11 +9,14 @@ use App\Http\Controllers\Auth\VerifayEmailController;
 use App\Http\Controllers\CandidateListController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewReschedulesController;
 use App\Http\Controllers\InterviewSlotsController;
 use App\Http\Controllers\MangmentTeamController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\SettingController;
@@ -22,14 +25,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-
-
-
-
-
-
-
-
+Route::get('Home/state', [HomeController::class, 'state']);
+Route::post('Home/subscribers', [HomeController::class, 'subscriber']);
 
 
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:register');
@@ -67,11 +64,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('candidates', CandidateListController::class);
     Route::post('applications/{application}/{decision}', [ApplicationController::class, 'decision']);
 
+
     Route::get('interviews/{interview}/slots', [InterviewSlotsController::class, 'index']);
     Route::post('interview-slots', [InterviewSlotsController::class, 'store']);
     Route::put('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'update']);
     Route::get('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'show']);
     Route::get('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'destroy']);
+
 
     Route::resource('interviews', InterviewController::class);
 
@@ -85,12 +84,15 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
+
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationsController::class, 'allNotifications']);
         Route::get('/unread', [NotificationsController::class, 'unReadNotifications']);
-        Route::put('/{id}/read', [NotificationsController::class, 'markAsRead']);
+        Route::put('/{notification}/read', [NotificationsController::class, 'markAsRead']);
         Route::put('/read-all', [NotificationsController::class, 'markAllAsRead']);
+        Route::delete('/{notification}', [NotificationsController::class, 'destroy']);
     });
+
 
     Route::post('/logout', [LoginController::class, 'logout']);
 });
@@ -108,3 +110,10 @@ Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix
     Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
 });
 Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
+
+Route::get('/plans', [PlanController::class, 'index']);
+Route::get('/plans/{plan}', [PlanController::class, 'show']);
+
+Route::post('payments/create', [PaymentController::class, 'create'])->middleware('auth:api');
+Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
+

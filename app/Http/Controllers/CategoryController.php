@@ -14,7 +14,7 @@ class CategoryController extends Controller
     public function index()
     {
         if (!auth()->user()->can('view_categories')) {
-            return apiResponse(403 , 'You Can Not View Category');
+            return apiResponse(403 , 'You Have No Permission To View Category');
         }
         $categories = Category::paginate();
 

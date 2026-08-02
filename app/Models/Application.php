@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Candidate;
+use App\Models\Position;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
+        use HasFactory;
+
+
     protected $fillable = [
         'candidate_id',
         'position_id',

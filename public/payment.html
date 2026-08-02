@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stripe Payment Test</title>
+
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            margin:50px;
+        }
+
+        #card-element{
+            width:350px;
+            border:1px solid #ccc;
+            padding:15px;
+            border-radius:8px;
+            margin-top:10px;
+        }
+
+        input{
+            width:350px;
+            padding:12px;
+            margin-bottom:10px;
+        }
+
+        button{
+            margin-top:20px;
+            padding:12px 30px;
+            cursor:pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<h2>Stripe Payment Test</h2>
+
+
+<input
+id="card-holder-name"
+placeholder="Name">
+
+
+<div id="card-element"></div>
+
+
+<button id="pay">
+    Pay
+</button>
+
+
+
+<script>
+const stripe = Stripe("pk_test_51TyvwA22Zz086J0h89eAh6PKmO0GavJcTFergIMP0E1UWcYTLkLgWLhQAAMqSsSWQ9DZ93q4G3b8D1jlmOoMQOz500zKkmLcuS");
+
+const elements = stripe.elements();
+
+const card = elements.create("card");
+card.mount("#card-element");
+
+document.getElementById("pay").addEventListener("click", async () => {
+
+    try {
+
+        const response = await fetch("http://127.0.0.1:8000/api/payments/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                    "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL3JlZ2lzdGVyIiwiaWF0IjoxNzg1NDM0MjYxLCJleHAiOjE3ODU0Mzc4NjEsIm5iZiI6MTc4NTQzNDI2MSwianRpIjoicG9kT1Q0YU5KQjRnWGx1UiIsInN1YiI6IjMxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.aT7h6EcKPcsuDmQrHxnV6kL2ruhoNnha80gHRZVvVkQ"
+
+            },
+            body: JSON.stringify({
+                plan_id: 1
+            })
+        });
+const result = await response.json();
+
+if (!response.ok) {
+    console.log(result);
+    alert(result.message);
+    return;
+}
+
+const clientSecret = result.data.client_secret;
+
+
+        const { paymentIntent, error } = await stripe.confirmCardPayment(
+            clientSecret,
+            {
+                payment_method: {
+                    card: card,
+                    billing_details: {
+                        name: document.getElementById("card-holder-name").value
+                    }
+                }
+            }
+        );
+
+        console.log("PaymentIntent:", paymentIntent);
+        console.log("Error:", error);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        alert(paymentIntent.status);
+
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
+    }
+
+});
+</script>
+
+
+</body>
+</html>

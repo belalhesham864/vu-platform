@@ -28,12 +28,24 @@ class TeamInvitationNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
+
+    public function toDatabase($notifiable)
+    {
+        return [
+            'title' => 'Team Invitation',
+            'greeting' => 'Hello ' . $notifiable->name,
+            'message' => 'You have been invited to join the company team.',
+            'role' => $this->invitation->role,
+            'expires_at' => $this->invitation->expires_at->format('Y-m-d H:i'),
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)

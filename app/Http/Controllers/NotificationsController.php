@@ -31,15 +31,15 @@ class NotificationsController extends Controller
         return apiResponse(200, 'Unread notifications retrieved successfully', new NotificationsResource($unreadNotifications));
     }
 
-    public function markAsRead(string $id)
+    public function markAsRead($notification)
     {
-        $user = Auth::user();
+        // $user = Auth::user();
 
-        $notification = $user->unreadNotifications()->find($id);
+        // $notification = $user->unreadNotifications()->find($id);
 
-        if (!$notification) {
-            return apiResponse(404, 'Notification not found');
-        }
+        // if (!$notification) {
+        //     return apiResponse(404, 'Notification not found');
+        // }
 
         $notification->markAsRead();
 
@@ -61,5 +61,12 @@ class NotificationsController extends Controller
         ]);
 
         return apiResponse(200, 'All notifications marked as read successfully');
+    }
+
+    public function destroy($notification)
+    {
+        $notification->delete();
+
+        return apiResponse(200 , 'Notification Deleted Successfully');
     }
 }

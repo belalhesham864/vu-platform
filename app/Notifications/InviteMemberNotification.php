@@ -17,7 +17,7 @@ class InviteMemberNotification extends Notification
     public $token;
     public function __construct($token)
     {
-        $this->token=$token;
+        $this->token = $token;
     }
 
     /**
@@ -27,28 +27,39 @@ class InviteMemberNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-public function toMail(object $notifiable): MailMessage
-{
-    $url=config('app.frontend_url')
-    .'/set-password?token='
-    .$this->token
-    .'&email='
-    .urlencode($notifiable->email);
+    public function toDatabase($notifiable)
+    {
+        return [
+            'title' => 'VU Platform Invitation',
+            'greeting' => 'Hello ' . $notifiable->name,
+            'message' => 'You have been invited to join VU Platform.',
+            'token_message' => 'Use the following token to set your password.',
+            'email' => $notifiable->email,
+        ];
+    }
 
-    return (new MailMessage)
-        ->subject('VU Platform Invitation')
-        ->greeting('Hello '.$notifiable->name)
-        ->line('You have been invited to join VU Platform.')
-        ->line('Use the following token to set your password:')
-        ->action('Set Password', $url)
-        ->line('Email: '.$notifiable->email);
-}
+    public function toMail(object $notifiable): MailMessage
+    {
+        $url = config('app.frontend_url')
+            . '/set-password?token='
+            . $this->token
+            . '&email='
+            . urlencode($notifiable->email);
+
+        return (new MailMessage)
+            ->subject('VU Platform Invitation')
+            ->greeting('Hello ' . $notifiable->name)
+            ->line('You have been invited to join VU Platform.')
+            ->line('Use the following token to set your password:')
+            ->action('Set Password', $url)
+            ->line('Email: ' . $notifiable->email);
+    }
     /**
      * Get the array representation of the notification.
      *
