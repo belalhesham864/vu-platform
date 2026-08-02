@@ -13,12 +13,14 @@ use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewReschedulesController;
 use App\Http\Controllers\InterviewSlotsController;
 use App\Http\Controllers\MangmentTeamController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TeamMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -62,9 +64,9 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('positions', PositionController::class);
     Route::resource('applications', ApplicationController::class);
-    Route::get('candidates' , CandidateListController::class);
+    Route::get('candidates', CandidateListController::class);
     Route::post('applications/{application}/{decision}', [ApplicationController::class, 'decision']);
-    
+
     Route::get('interviews/{interview}/slots', [InterviewSlotsController::class, 'index']);
     Route::post('interview-slots', [InterviewSlotsController::class, 'store']);
     Route::put('interview-slots/{interviewSlot}', [InterviewSlotsController::class, 'update']);
@@ -82,22 +84,27 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('evaluations', EvaluationController::class);
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
-    
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationsController::class, 'allNotifications']);
+        Route::get('/unread', [NotificationsController::class, 'unReadNotifications']);
+        Route::put('/{id}/read', [NotificationsController::class, 'markAsRead']);
+        Route::put('/read-all', [NotificationsController::class, 'markAllAsRead']);
+    });
+
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
-    Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function(){
-        Route::get('/','show');
-        Route::put('/update','update');
-    });
-    Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix('team/')->group(function(){
-        Route::get('/','index');
-        Route::Post('/invite','invite');
-        Route::put('/update','update')->name('update');
-            Route::patch('/{user}', [MangmentTeamController::class, 'update']);
-            Route::post('/{id}/resend-invite', [MangmentTeamController::class, 'resendInvite']);
-            Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
-
-
-    });
-    Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
+Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function () {
+    Route::get('/', 'show');
+    Route::put('/update', 'update');
+});
+Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix('team/')->group(function () {
+    Route::get('/', 'index');
+    Route::Post('/invite', 'invite');
+    Route::put('/update', 'update')->name('update');
+    Route::patch('/{user}', [MangmentTeamController::class, 'update']);
+    Route::post('/{id}/resend-invite', [MangmentTeamController::class, 'resendInvite']);
+    Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
+});
+Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
