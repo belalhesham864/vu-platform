@@ -1,0 +1,21 @@
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 15) {
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 16)   public function login(LoginRequest $request)
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 17)   {
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 18)     $data = $request->validated();
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 19)     $token = Auth::guard('api')->attempt($data);
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 20)     if (!$token) {
+ff202795 (Ahmed Fekry       2026-07-26 21:56:31 +0300 21)       return apiResponse(401, 'Unauthorized');
+00000000 (Not Committed Yet 2026-07-31 15:01:16 -0500 22)     }
+00000000 (Not Committed Yet 2026-07-31 15:01:16 -0500 23)   }
+8ca9f587 (belal             2026-07-26 04:03:06 -0500 24)     public function login(LoginRequest $request)
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 25)     {
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 26)         $data = $request->validated();
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 27)         $token = Auth::guard('api')->attempt($data);
+1316be95 (belal             2026-07-27 06:23:08 -0500 28)              if (!$token) {
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 29)             return apiResponse(401, 'Unauthorized');
+36ad5ed4 (belal             2026-07-24 15:39:47 -0500 30)         }
+1316be95 (belal             2026-07-27 06:23:08 -0500 31)         $user = auth()->user();
+1316be95 (belal             2026-07-27 06:23:08 -0500 32) 
+00000000 (Not Committed Yet 2026-07-31 15:01:16 -0500 33) 
+8ca9f587 (belal             2026-07-26 04:03:06 -0500 34)         return apiResponse(200, 'Login Success', ['user' => new UserResource($user), 'token' => $token]);
+85bafca0 (Ahmed Fekry       2026-07-28 17:06:40 +0300 35) 
