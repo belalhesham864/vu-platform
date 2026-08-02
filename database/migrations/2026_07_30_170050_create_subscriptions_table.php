@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('start_at');
             $table->dateTime('end_at');
           $table->enum('status', ['active','expired','canceled'])->default('active');
+          $table->foreignId('payment_id')->constrained('payments')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ return new class extends Migration
 
     $table->decimal('price', 10, 2)->nullable();
 
+
     $table->string('currency', 3)->default('EGP');
 
     $table->integer('duration_days')->default(30);
@@ -27,7 +28,7 @@ return new class extends Migration
     $table->boolean('is_custom')->default(false);
 
     $table->boolean('is_active')->default(true);
-
+ $table->string('stripe_price_id')->nullable();
             $table->timestamps();
         });
     }

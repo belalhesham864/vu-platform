@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
             $table->timestamp('paid_at')->nullable();
+                $table->string('stripe_subscription_id')->nullable();
             $table->timestamps();
         });
     }
