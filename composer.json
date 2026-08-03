@@ -47,7 +47,7 @@
             "Tests\\": "tests/"
         },
         "files": [
-            "app/http/helper.php"
+            "app/Http/Helper.php"
         ]
     },
 
@@ -57,25 +57,9 @@
         "Database\\Seeders\\": "database/seeders/"
     },
     "files": [
-        "app/Http/helper.php"
+        "app/Http/Helper.php"
     ],
 
-
-  "autoload-dev": {
-    "psr-4": {
-        "Tests\\": "tests/"
-    }
-
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        },
-        "files": [
-            "app/http/helper.php"
-        ]
-
-    },
     "scripts": {
         "setup": [
             "composer install",
