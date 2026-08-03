@@ -15,6 +15,12 @@ use App\Http\Controllers\MangmentTeamController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\Dashboard\AdminDashboardController;
+use App\Http\Controllers\Dashboard\HrDashboardController;
+use App\Http\Controllers\Dashboard\HrInterviewerDashboardController;
+use App\Http\Controllers\Dashboard\TechInterviewerDashboardController;
+use App\Http\Controllers\Dashboard\AccountManagerDashboardController;
+use App\Http\Controllers\Dashboard\OwnerDashboardController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\SettingController;
@@ -72,6 +78,16 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
+    // ─── Dashboard (dispatcher — returns data based on logged-in user role) ───
+    // Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // ─── Dashboard (individual role-protected endpoints) ──────────────────────
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/owner',            [OwnerDashboardController::class,          'index']);
+        Route::get('/admin',            [AdminDashboardController::class,          'index']);
+     
+    });
+
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationsController::class, 'allNotifications']);
         Route::get('/unread', [NotificationsController::class, 'unReadNotifications']);
@@ -102,7 +118,6 @@ Route::get('/plans/{plan}', [PlanController::class, 'show']);
 
 
 Route::post('payments/create', [PaymentController::class, 'create'])->middleware('auth:api');
-Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
-Route::post('payments/create',[PaymentController::class,'create'])->middleware('auth:api');
+
 Route::post('/payments/subscription', [PaymentController::class, 'subscription'])->middleware('auth:api');
-Route::post('/stripe/webhook', [PaymentController::class, 'webhook']);
+
