@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+<<<<<<< HEAD
+=======
 use App\Models\Company;
+>>>>>>> f699f1ba736d0b6a808622a59cbea248d4b5b091
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +33,8 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+<<<<<<< HEAD
+=======
                   'status' => fake()->randomElement([
                 'active',
                 'inactive',
@@ -37,6 +42,7 @@ class UserFactory extends Factory
             ]),
                         'company_id' => Company::inRandomOrder()->value('id'),
 
+>>>>>>> f699f1ba736d0b6a808622a59cbea248d4b5b091
             'remember_token' => Str::random(10),
         ];
     }

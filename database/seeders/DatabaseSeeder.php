@@ -3,9 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+<<<<<<< HEAD
+=======
 use Database\Seeders\ApplicationSeeder;
 use Database\Seeders\CandidateSeeder;
 use Database\Seeders\PositionSeeder;
+>>>>>>> f699f1ba736d0b6a808622a59cbea248d4b5b091
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +23,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+<<<<<<< HEAD
+         $this->call(RoleSeeder::class);
+=======
          $this->call([
             RoleSeeder::class,
             CompanySeeder::class,
@@ -31,6 +37,7 @@ class DatabaseSeeder extends Seeder
             ApplicationSeeder::class,
             InterviewSeeder::class,
          ]);
+>>>>>>> f699f1ba736d0b6a808622a59cbea248d4b5b091
 
     }
 }

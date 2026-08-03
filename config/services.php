@@ -21,6 +21,7 @@ return [
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],
+
     'stripe' => [
     'secret' => env('STRIPE_SECRET'),
         'webhook_secret'=>env('STRIPE_WEBHOOK_SECRET'),
