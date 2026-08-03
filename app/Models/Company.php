@@ -40,14 +40,6 @@ public function payments()
     return $this->hasMany(payments::class);
 }
 
-public function subscriptions()
-{
-    return $this->hasMany(subscriptions::class);
-}
 
-public function payments()
-{
-    return $this->hasMany(payments::class);
-}
 
 }
