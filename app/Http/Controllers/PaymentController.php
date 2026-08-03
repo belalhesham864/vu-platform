@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\Customer;
+use Stripe\PaymentMethod;
 use Stripe\SetupIntent;
 use Stripe\Subscription;
 use Stripe\Stripe;
@@ -80,6 +81,15 @@ class PaymentController extends Controller
             ]);
         }
 
+        try {
+            $paymentMethod = PaymentMethod::retrieve($request->payment_method_id);
+            if ($paymentMethod->customer !== $company->stripe_customer_id) {
+                $paymentMethod->attach(['customer' => $company->stripe_customer_id]);
+            }
+        } catch (\Exception $e) {
+            // PaymentMethod might already be attached or invalid
+        }
+
         $subscription = Subscription::create([
             'customer' => $company->stripe_customer_id,
             'items' => [
@@ -94,10 +104,28 @@ class PaymentController extends Controller
 
         $invoice = $subscription->latest_invoice;
 
+        $clientSecret = null;
+        $paymentIntentId = null;
+
+        if (isset($invoice->payment_intent)) {
+            $paymentIntent = $invoice->payment_intent;
+            if (is_object($paymentIntent)) {
+                $clientSecret = $paymentIntent->client_secret ?? null;
+                $paymentIntentId = $paymentIntent->id ?? null;
+            } elseif (is_string($paymentIntent)) {
+                $paymentIntentId = $paymentIntent;
+                try {
+                    $pi = \Stripe\PaymentIntent::retrieve($paymentIntent);
+                    $clientSecret = $pi->client_secret;
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
         $payment = payments::create([
             'company_id' => $company->id,
             'plan_id' => $plan->id,
-            'stripe_payment_intent_id' => null,
+            'stripe_payment_intent_id' => $paymentIntentId,
             'stripe_subscription_id' => $subscription->id,
             'amount' => $plan->price,
             'status' => 'pending'
@@ -106,7 +134,7 @@ class PaymentController extends Controller
         return apiResponse(200, 'Subscription created', [
             'subscription_id' => $subscription->id,
             'status' => $subscription->status,
-            'client_secret' => $invoice->payment_intent->client_secret ?? null,
+            'client_secret' => $clientSecret,
         ]);
     }
 

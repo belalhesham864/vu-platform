@@ -22,12 +22,14 @@ class DatabaseSeeder extends Seeder
 
          $this->call([
             RoleSeeder::class,
+            CompanySeeder::class,
+            CategorySeeder::class,
             UserSeeder::class,
-              CompanySeeder::class,
-              CandidateSeeder::class,
-        PositionSeeder::class,
-        PlanSeeder::class,
-        ApplicationSeeder::class,
+            CandidateSeeder::class,
+            PositionSeeder::class,
+            PlanSeeder::class,
+            ApplicationSeeder::class,
+            InterviewSeeder::class,
          ]);
 
     }
