@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\Position;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,16 @@ protected $fillable = ['company_name','slug','industry','location','about','phon
 {
     return $this->hasOne(User::class)->role('Owner');
 }
+public function subscriptions()
+{
+    return $this->hasMany(subscriptions::class);
+}
+
+public function payments()
+{
+    return $this->hasMany(payments::class);
+}
+
 public function subscriptions()
 {
     return $this->hasMany(subscriptions::class);

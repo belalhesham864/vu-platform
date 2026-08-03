@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Candidate;
+use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-        use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'candidate_id',

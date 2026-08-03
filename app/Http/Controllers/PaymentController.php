@@ -10,28 +10,34 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\Customer;
-use Stripe\PaymentIntent;
+use Stripe\PaymentMethod;
 use Stripe\SetupIntent;
 use Stripe\Subscription;
 use Stripe\Stripe;
-
 use Stripe\Webhook;
 
 class PaymentController extends Controller
 {
     public function create(CreatePaymentRequest $request)
     {
-
         $plan = Plan::findOrFail($request->plan_id);
         if ($plan->is_custom) {
             return apiResponse(404, 'Contact Sales');
         }
-        $company = auth()->user()->company;
+
+        $user = auth()->user();
+        $company = $user->company;
+
+        if (!$company) {
+            return apiResponse(400, 'User company not found');
+        }
+
         Stripe::setApiKey(config('services.stripe.secret'));
+
         if (!$company->stripe_customer_id) {
             $customer = Customer::create([
                 'name' => $company->company_name,
-                'email' => auth()->user()->email
+                'email' => $user->email
             ]);
             $company->update([
                 'stripe_customer_id' => $customer->id
@@ -50,52 +56,95 @@ class PaymentController extends Controller
 
     public function subscription(Request $request)
     {
-        $plan = Plan::findOrFail($request->plan_id);
+        $request->validate([
+            'plan_id' => 'required|exists:plans,id',
+            'payment_method_id' => 'required|string',
+        ]);
 
-        $company = auth()->user()->company;
+        $plan = Plan::findOrFail($request->plan_id);
+        $user = auth()->user();
+        $company = $user->company;
+
+        if (!$company) {
+            return apiResponse(400, 'User company not found');
+        }
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
+        if (!$company->stripe_customer_id) {
+            $customer = Customer::create([
+                'name' => $company->company_name,
+                'email' => $user->email
+            ]);
+            $company->update([
+                'stripe_customer_id' => $customer->id
+            ]);
+        }
+
+        try {
+            $paymentMethod = PaymentMethod::retrieve($request->payment_method_id);
+            if ($paymentMethod->customer !== $company->stripe_customer_id) {
+                $paymentMethod->attach(['customer' => $company->stripe_customer_id]);
+            }
+        } catch (\Exception $e) {
+            // PaymentMethod might already be attached or invalid
+        }
 
         $subscription = Subscription::create([
             'customer' => $company->stripe_customer_id,
-
             'items' => [
                 [
                     'price' => $plan->stripe_price_id,
                 ]
             ],
-
             'default_payment_method' => $request->payment_method_id,
-                'payment_behavior' => 'default_incomplete',
-    'expand' => ['latest_invoice.payment_intent'],
+            'payment_behavior' => 'default_incomplete',
+            'expand' => ['latest_invoice.payment_intent'],
         ]);
-$invoice=$subscription->latest_invoice;
+
+        $invoice = $subscription->latest_invoice;
+
+        $clientSecret = null;
+        $paymentIntentId = null;
+
+        if (isset($invoice->payment_intent)) {
+            $paymentIntent = $invoice->payment_intent;
+            if (is_object($paymentIntent)) {
+                $clientSecret = $paymentIntent->client_secret ?? null;
+                $paymentIntentId = $paymentIntent->id ?? null;
+            } elseif (is_string($paymentIntent)) {
+                $paymentIntentId = $paymentIntent;
+                try {
+                    $pi = \Stripe\PaymentIntent::retrieve($paymentIntent);
+                    $clientSecret = $pi->client_secret;
+                } catch (\Exception $e) {
+                }
+            }
+        }
 
         $payment = payments::create([
             'company_id' => $company->id,
             'plan_id' => $plan->id,
-            'stripe_payment_intent_id' =>null ,
+            'stripe_payment_intent_id' => $paymentIntentId,
             'stripe_subscription_id' => $subscription->id,
             'amount' => $plan->price,
-            'currency' => 'egp',
             'status' => 'pending'
         ]);
 
         return apiResponse(200, 'Subscription created', [
             'subscription_id' => $subscription->id,
             'status' => $subscription->status,
-            'client_secret' => $invoice->confirmation_secret->client_secret ?? NULL,
-
+            'client_secret' => $clientSecret,
         ]);
     }
+
     public function webhook(Request $request)
     {
         $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
         $secret = config('services.stripe.webhook_secret');
-        try {
 
+        try {
             $event = Webhook::constructEvent($payload, $sigHeader, $secret);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid signature'], 400);
@@ -110,65 +159,80 @@ $invoice=$subscription->latest_invoice;
         } elseif ($event->type == 'customer.subscription.deleted') {
             $this->handlesubscraptionCancled($event->data->object);
         } else {
-            Log::error('error in stripe: ' . $event->type);
+            Log::info('Stripe Event unhandled: ' . $event->type);
         }
-        return response()->json([
-            'status' => 'success'
-        ]);
+
+        return response()->json(['status' => 'success']);
     }
+
     public function handleInvoicesSuccess($invoice)
     {
         $payment = payments::where('stripe_subscription_id', $invoice->subscription)->first();
         if (!$payment) {
-            return Log::error('no payment found');
+            Log::error('No payment found for subscription: ' . $invoice->subscription);
+            return;
         }
+
         DB::transaction(function () use ($payment) {
             $payment->update([
                 'status' => 'success',
                 'paid_at' => now(),
             ]);
-            $subscription = SubscriptionModel::firstOrCreate(['payment_id' => $payment->id], [
-                'company_id' => $payment->company_id,
-                'plan_id' => $payment->plan_id,
-                'payment_id' => $payment->id,
-                'start_at' => now(),
-                'end_at' => now()->addMonth(),
-                'status' => 'active',
-            ]);
+
+            $subscription = SubscriptionModel::firstOrCreate(
+                ['payment_id' => $payment->id],
+                [
+                    'company_id' => $payment->company_id,
+                    'plan_id' => $payment->plan_id,
+                    'start_at' => now(),
+                    'end_at' => now()->addMonth(),
+                    'status' => 'active',
+                ]
+            );
+
             $subscription->update([
                 'end_at' => now()->addMonth(),
                 'status' => 'active'
             ]);
         });
     }
+
     public function handleInvoicesFailed($invoice)
     {
         $payment = payments::where('stripe_subscription_id', $invoice->subscription)->first();
         if (!$payment) {
-            return Log::error('no payment found');
+            Log::error('No payment found for subscription: ' . $invoice->subscription);
+            return;
         }
+
         $payment->update([
             'status' => 'failed',
             'paid_at' => now(),
         ]);
     }
+
     public function handlesubscraptionCancled($sub)
     {
         $payment = payments::where('stripe_subscription_id', $sub->id)->first();
         if (!$payment) {
-            return Log::error('no payment found');
+            Log::error('No payment found for subscription: ' . $sub->id);
+            return;
         }
+
         SubscriptionModel::where('payment_id', $payment->id)->update([
             'status' => 'canceled',
             'end_at' => now()
         ]);
     }
+
     public function handlesubscraptionUpdated($sub)
     {
         $payment = payments::where('stripe_subscription_id', $sub->id)->first();
         if (!$payment) {
-            return Log::error('no payment found');
+            Log::error('No payment found for subscription: ' . $sub->id);
+            return;
         }
+
         SubscriptionModel::where('payment_id', $payment->id)->update([
             'status' => $sub->status,
         ]);

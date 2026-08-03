@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth\password;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Notifications\ForgetpasswordNotification;
+use App\Notifications\ForgetPasswordNotification;
 use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
 
@@ -20,7 +20,7 @@ public $otp;
         $data = $request->validate(['email' => 'required|exists:users,email']);
              
         $user = User::whereEmail($data['email'])->first();
-         $user->notify(new ForgetpasswordNotification());
+         $user->notify(new ForgetPasswordNotification());
               return apiResponse(200, 'Otp Code Send Check Your Email');
     }
 

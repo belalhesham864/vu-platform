@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class payments extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'company_id',
         'plan_id',
         'stripe_payment_intent_id',
+        'stripe_subscription_id',
         'amount',
         'status',
         'paid_at',

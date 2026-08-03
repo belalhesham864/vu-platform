@@ -30,13 +30,12 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-                  'status' => fake()->randomElement([
+            'status' => fake()->randomElement([
                 'active',
                 'inactive',
                 'invited'
             ]),
-                        'company_id' => Company::inRandomOrder()->value('id'),
-
+            'company_id' => Company::inRandomOrder()->value('id'),
             'remember_token' => Str::random(10),
         ];
     }

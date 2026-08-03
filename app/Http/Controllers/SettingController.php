@@ -7,9 +7,19 @@ use App\Http\Resources\CompanyResource;
 use App\Http\Resources\SettingResource;
 use App\Utils\ImageManger;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class SettingController extends Controller
+class SettingController extends Controller implements HasMiddleware
+
 {
+    public static function middleware()
+    {
+        return [
+            new Middleware('can:manage_company_settings'),
+            new Middleware('auth:api')
+        ];
+    }
     public function show()
     {
         $company = auth()->user()->company()->with('owner')

@@ -21,125 +21,94 @@ use App\services\Team\inviteTeamServices;
 
 class MangmentTeamController extends Controller implements HasMiddleware
 {
-public static function middleware(): array
-{ 
-    return[
+    public static function middleware(): array
+    {
+        return[
+            new Middleware('can:manage_team_members', except: ['resetPassword']),
+        ];
+    }
 
-    new Middleware('can:manage_team_members',except:['resetPassword']),
-    ];
-}
     public function index()
     {
         $users = User::with('roles')->where('company_id', auth()->user()->company_id)->get();
         return apiResponse(200, 'All Team', TeamResource::collection($users));
     }
 
-    public function invite(InviteMemberRequest $request,inviteTeamServices $invite )
+    public function invite(InviteMemberRequest $request, inviteTeamServices $invite)
     {
-        $user=$invite->invite($request);
-        if(!$user){
-
+        $user = $invite->invite($request);
+        if (!$user) {
             return apiResponse(201, 'error please try again latter');
         }
-        
-            return apiResponse(201, 'Invitation sent successfully');
+        return apiResponse(201, 'Invitation sent successfully');
     }
+
     public function resetPassword(SetPasswordRequest $request)
     {
         $data = $request->validated();
-         $status = Password::reset(
+        $status = Password::reset(
             [
                 'email' => $data['email'],
                 'token' => $data['token'],
                 'password' => $data['password'],
                 'password_confirmation' => $request->input('password_confirmation'),
             ],
-                 function ($user, $password) {
+            function ($user, $password) {
                 $user->update([
                     'password' => Hash::make($password),
                     'status' => 'active',
-                    'email_verified_at'=>now()
+                    'email_verified_at' => now()
                 ]);
             }
-
-            );
-            if ($status !== Password::PASSWORD_RESET) {
-return apiResponse(422, 'Invalid or expired token');
-                   }
-                   return apiResponse(200, 'Password Reset successfully');
-
-
+        );
+        if ($status !== Password::PASSWORD_RESET) {
+            return apiResponse(422, 'Invalid or expired token');
+        }
+        return apiResponse(200, 'Password Reset successfully');
     }
-    public function update(UpdateMemberRequest $request,User $user){
-        $data=$request->validated();
-        if($user->hasRole('Owner')){
-            return apiResponse(403,'You cannot modify the Owner role');
+
+    public function update(UpdateMemberRequest $request, User $user)
+    {
+        $data = $request->validated();
+        if ($user->hasRole('Owner')) {
+            return apiResponse(403, 'You cannot modify the Owner role');
         }
-        if($user->company_id != auth()->user()->company_id){
-      return apiResponse(404, 'Member not found');
+        if ($user->company_id != auth()->user()->company_id) {
+            return apiResponse(404, 'Member not found');
         }
-     $user->syncRoles([$data['role']]);
-             $user->update(['status' => $data['status']]);
+        $user->syncRoles([$data['role']]);
+        $user->update(['status' => $data['status']]);
         return apiResponse(200, 'Member updated successfully', new TeamResource($user->fresh()));
-
-        
-
     }
-    public function resendInvite($id){
-                  $user=User::find($id);
-                if(!$user){
-      return apiResponse(404, 'Member not found');
-      }
-          if($user->hasRole('Owner')){
-            return apiResponse(403,'You cannot sent invite to owner');
+
+    public function resendInvite($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return apiResponse(404, 'Member not found');
         }
-    
-           if ($user->status !== 'invited') {
+        if ($user->hasRole('Owner')) {
+            return apiResponse(403, 'You cannot sent invite to owner');
+        }
+        if ($user->status !== 'invited') {
             return apiResponse(422, 'This member already has an active account');
         }
-        DB::table('password_reset_tokens')->where('email',$user->email)->delete();
-           $token = Password::createToken($user);
-
-            $user->notify(new InviteMemberNotification($token));
-                    return apiResponse(200, 'Invitation resent successfully');
-
+        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+        $token = Password::createToken($user);
+        $user->notify(new InviteMemberNotification($token));
+        return apiResponse(200, 'Invitation resent successfully');
     }
-    public function delete($id){
-              $user=User::find($id);
-                if(!$user){
-      return apiResponse(404, 'Member not found');
-      }
-                  if($user->hasRole('Owner')){
-            return apiResponse(403,'You cannot delete the Owner');
-        }
-  
-      $user->delete();
-      return apiResponse(200, 'User Deleted Successfuly');
 
+    public function delete($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return apiResponse(404, 'Member not found');
+        }
+        if ($user->hasRole('Owner')) {
+            return apiResponse(403, 'You cannot delete the Owner');
+        }
+        $user->delete();
+        return apiResponse(200, 'User Deleted Successfuly');
     }
 }
-
-
-// https://apitest.myfatoorah.com/v2/SendPayment   
-// SK_KWT_vVZlnnAqu8jRByOWaRPNId4ShzEDNt256dvnjebuyzo52dXjAfRx2ixW5umjWSUx
-// $postFields = [
-//     //Fill required data
-//     'InvoiceValue'       => $invoiceValue,
-//     'CustomerName'       => 'fname lname',
-//     'NotificationOption' => 'LNK', //'SMS', 'EML', or 'ALL'
-//         //Fill optional data
-//         //'DisplayCurrencyIso' => $displayCurrencyIso,
-//         //'MobileCountryCode'  => $phone[0],
-//         //'CustomerMobile'     => $phone[1],
-//         //'CustomerEmail'      => 'email@example.com',
-//         //'CallBackUrl'        => 'https://example.com/callback.php',
-//         //'ErrorUrl'           => 'https://example.com/callback.php', //or 'https://example.com/error.php'
-//         //'Language'           => 'en', //or 'ar'
-//         //'CustomerReference'  => 'orderId',
-//         //'CustomerCivilId'    => 'CivilId',
-//         //'UserDefinedField'   => 'This could be string, number, or array',
-//         //'ExpiryDate'         => '', //The Invoice expires after 3 days by default. Use 'Y-m-d\TH:i:s' format in the 'Asia/Kuwait' time zone.
-//         //'CustomerAddress'    => $customerAddress,
-//         //'InvoiceItems'       => $invoiceItems,
-//         //'Suppliers'          => $suppliers,
-// ];
