@@ -28,7 +28,6 @@ use App\Http\Controllers\TeamMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 Route::get('Home/state', [HomeController::class, 'state']);
 Route::post('Home/subscribers', [HomeController::class, 'subscriber']);
 
@@ -55,10 +54,8 @@ Route::controller(ForgetPasswordController::class)->group(function () {
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:reset-password');
 
-
 Route::post('/register-candidate', [RegisterController::class, 'registerCandidate'])->middleware('throttle:register');
 Route::post('/login-candidate', [LoginController::class, 'loginCandidate'])->middleware('throttle:login');
-
 
 Route::middleware('auth:api')->group(function () {
     Route::resource('categories', CategoryController::class);
@@ -72,7 +69,6 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
-    // ─── Dashboard (individual role-protected endpoints) ──────────────────────
     Route::prefix('dashboard')->group(function () {
         Route::get('/owner',            [OwnerDashboardController::class,          'index']);
         Route::get('/admin',            [AdminDashboardController::class,          'index']);
