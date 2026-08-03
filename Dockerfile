@@ -1,4 +1,4 @@
-# Stage 1: Build assets
+# Stage 1: Build Frontend Assets
 FROM node:20-alpine AS assets-builder
 WORKDIR /app
 COPY package*.json ./
@@ -6,8 +6,11 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 2: PHP Application
+# Stage 2: PHP Application Environment
 FROM php:8.3-fpm-alpine
+
+# Set working directory
+WORKDIR /var/www
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -21,7 +24,9 @@ RUN apk add --no-cache \
     oniguruma-dev \
     icu-dev \
     libzip-dev \
-    mysql-client
+    mysql-client \
+    nginx \
+    supervisor
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -34,27 +39,31 @@ RUN docker-php-ext-install \
     intl \
     zip
 
+# Install Redis extension
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www
-
-# Copy existing application directory contents
+# Copy project files
 COPY . .
 
-# Copy built assets from assets-builder
+# Copy built assets from Stage 1
 COPY --from=assets-builder /app/public/build ./public/build
 
-# Install composer dependencies, skipping post-install scripts
-RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
+# Install Laravel dependencies
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Set permissions
+# Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Artisan commands moved to entrypoint.sh to prevent build failures due to code-level issues during discovery
+# Copy and prepare entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000
-COPY entrypoint.sh /var/www/entrypoint.sh
-RUN chmod +x /var/www/entrypoint.sh
+
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
