@@ -70,12 +70,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
     Route::prefix('dashboard')->group(function () {
-        Route::get('/owner',            [OwnerDashboardController::class,          'index']);
-        Route::get('/admin',            [AdminDashboardController::class,          'index']);
-        Route::get('/hr',               [HrDashboardController::class,             'index']);
-        Route::get('/hr-interviewer',   [HrInterviewerDashboardController::class,  'index']);
-        Route::get('/tech-interviewer', [TechInterviewerDashboardController::class, 'index']);
-        Route::get('/account-manager',  [AccountManagerDashboardController::class, 'index']);
+        Route::get('/owner', [OwnerDashboardController::class,'index']);
+        Route::get('/admin',[AdminDashboardController::class, 'index']);
+      
     });
 
     Route::prefix('notifications')->group(function () {
@@ -86,7 +83,6 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{notification}', [NotificationsController::class, 'destroy']);
     });
 
-    Route::post('/logout', [LoginController::class, 'logout']);
 });
 
 Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function () {
