@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     use Sluggable, HasFactory;
-protected $fillable = ['company_name','slug','industry','location','about','phone','logo','website','company_size','status'];
+protected $fillable = ['company_name','slug','industry','location','about','phone','logo','website','company_size','status','stripe_customer_id'];
         public function sluggable(): array
     {
         return [

@@ -91,5 +91,9 @@ Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
 Route::get('/plans', [PlanController::class, 'index']);
 Route::get('/plans/{plan}', [PlanController::class, 'show']);
 
+
 Route::post('payments/create', [PaymentController::class, 'create'])->middleware('auth:api');
 Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
+Route::post('payments/create',[PaymentController::class,'create'])->middleware('auth:api');
+Route::post('/payments/subscription', [PaymentController::class, 'subscription'])->middleware('auth:api');
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook']);
