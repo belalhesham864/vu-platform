@@ -12,6 +12,7 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\MangmentTeamController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PositionController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TeamMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -70,7 +72,14 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
-
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationsController::class, 'allNotifications']);
+        Route::get('/unread', [NotificationsController::class, 'unReadNotifications']);
+        Route::put('/{notification}/read', [NotificationsController::class, 'markAsRead']);
+        Route::put('/read-all', [NotificationsController::class, 'markAllAsRead']);
+        Route::delete('/{notification}', [NotificationsController::class, 'destroy']);
+    });
+    
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
