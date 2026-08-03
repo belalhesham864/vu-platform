@@ -8,7 +8,7 @@ use App\Http\Resources\SettingResource;
 use App\Utils\ImageManger;
 use Illuminate\Http\Request;
 
-class SettingController extends Controller
+class SettingController extends Controller 
 {
     public function show()
     {
