@@ -24,6 +24,8 @@ class PlanSeeder extends Seeder
             'description' => 'Basic Plan',
             'is_custom' => false,
             'is_active' => true,
+         'stripe_price_id' => 'price_1TzpBz22Zz086J0hkXQyOS4B',
+
         ]);
         $basic->features()->createMany([
             ['feature' => 'Up to 5 job announcements'],
@@ -42,6 +44,7 @@ class PlanSeeder extends Seeder
             'description' => 'Premium Plan',
             'is_custom' => false,
             'is_active' => true,
+            'stripe_price_id'=>'price_1TzpCY22Zz086J0hd7vdtSJs'
         ]);
         $perimum->features()->createMany([
              ['feature' => 'Unlimited job announcements'],
@@ -61,6 +64,7 @@ class PlanSeeder extends Seeder
             'description' => 'Enterprise Plan',
             'is_custom' => true,
             'is_active' => true,
+             'stripe_price_id' => null,
         ]);
 $enterprise->features()->createMany([
     ['feature' => 'Everything in Premium'],

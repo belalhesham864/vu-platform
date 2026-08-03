@@ -23,7 +23,9 @@ return new class extends Migration
             $table->string('logo');
             $table->string('website');
             $table->string('company_size');
-          $table->enum('status', ['pending','active','suspended'])->default('pending'); 
+            $table->enum('status', ['pending','active','suspended'])->default('pending');
+            $table->string('stripe_customer_id')->nullable();
+
         //    $table->foreignId('subscription_plan_id')->nullable();
 
             $table->timestamps();
