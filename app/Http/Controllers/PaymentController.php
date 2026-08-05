@@ -84,10 +84,19 @@ class PaymentController extends Controller
         try {
             $paymentMethod = PaymentMethod::retrieve($request->payment_method_id);
             if ($paymentMethod->customer !== $company->stripe_customer_id) {
+                if ($paymentMethod->customer) {
+                    $paymentMethod->detach();
+                }
                 $paymentMethod->attach(['customer' => $company->stripe_customer_id]);
             }
+
+            Customer::update($company->stripe_customer_id, [
+                'invoice_settings' => [
+                    'default_payment_method' => $request->payment_method_id,
+                ],
+            ]);
         } catch (\Exception $e) {
-            // PaymentMethod might already be attached or invalid
+            Log::warning('PaymentMethod attach warning: ' . $e->getMessage());
         }
 
         $subscription = Subscription::create([
