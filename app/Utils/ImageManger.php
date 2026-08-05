@@ -9,14 +9,12 @@ class ImageManger
 {
     public static function uploadImage($request, $folder)
     {
-       
-
-            $image = $request->file($folder);
-            $filename = Str::uuid() . time() . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs($folder, $filename, ['disk' => 'uploads']);
-            return $path;
-        
+        $image = $request->file($folder);
+        $filename = Str::uuid() . time() . '.' . $image->getClientOriginalExtension();
+        $path = $image->storeAs($folder, $filename, ['disk' => 'uploads']);
+        return $path;
     }
+
     public static function update($request, $model, $folder)
     {
         $imagePath = str_replace(asset('/'), '', $model->image);
@@ -30,10 +28,8 @@ class ImageManger
         return $path;
     }
 
-
     public static function delete($path)
     {
-
         if (File::exists(public_path('uploads/'.$path))) {
             File::delete(public_path('uploads/'.$path));
         }
