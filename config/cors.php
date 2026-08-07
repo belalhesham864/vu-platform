@@ -22,8 +22,8 @@ return [
     "allowed_origins" => [
     "https://vu-platform.vercel.app", 
     "https://vuplatformzikola.duckdns.org", 
-    "http://localhost:3000"
-    #"https://vuplatformzikolaa.duckdns.org"
+    "http://localhost:3000",
+    "https://vuplatformzikolaa.duckdns.org"
 ],
 
     'allowed_origins_patterns' => [],
