@@ -38,13 +38,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.APP_DIR }}
-            # 1. سحب أحدث ملفات الإعداد (docker-compose, nginx.conf)
+            # 1. سحب الملفات الجديدة على الخادم لكي يراها الـ Volume
             git pull origin main
-            # 2. تسجيل الدخول لسحب الصورة الجديدة
+            # 2. سحب الصورة الجديدة وتشغيلها
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            # 3. تحديث الحاويات ومسح الكاش
             docker compose pull
             docker compose up -d
+            # 3. مسح كاش Laravel فوراً
             docker compose exec -T app php artisan optimize:clear
             # 4. تنظيف الصور القديمة
             docker image prune -f
