@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vu-platform-app
+    image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
     env_file: .env
     volumes:
