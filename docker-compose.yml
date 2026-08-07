@@ -2,15 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
     env_file: .env
+    # تم إزالة الـ Volume الذي كان يربط المجلد المحلي لضمان استخدام الكود الجديد من الصورة
     volumes:
-      - ./:/var/www
-      - /var/www/vendor
+      - app-content:/var/www
     networks:
       - vu-network
     depends_on:
@@ -24,7 +21,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./:/var/www
+      # نستخدم نفس المجلد من حاوية app لكي يستطيع Nginx الوصول للملفات العامة (public)
+      - app-content:/var/www
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
@@ -57,7 +55,7 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
-      - ./:/var/www
+      - app-content:/var/www
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
@@ -65,6 +63,7 @@ networks:
     driver: bridge
 
 volumes:
+  app-content: # مجلد مشترك لضمان تزامن الكود بين الحاويات
   db-data:
   certbot-etc:
   certbot-var:
