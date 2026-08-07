@@ -26,10 +26,15 @@ RUN apk add --no-cache \
     libzip-dev \
     mysql-client \
     nginx \
-    supervisor
+    supervisor \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    zlib-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install \
+# Configure and Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install \
     pdo_mysql \
     mbstring \
     exif \
