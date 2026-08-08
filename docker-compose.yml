@@ -1,26 +1,25 @@
-version: '3.8'
-
 services:
   app:
     image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
     env_file: .env
-    # تم إزالة سطر ./:/var/www لكي يقرأ Docker الكود الجديد من GitHub مباشرة
+    # تمت إزالة مجلد ./:/var/www لكي يقرأ Docker الكود الجديد من GitHub مباشرة
     networks:
       - vu-network
     depends_on:
       - db
       - redis
-   queue-worker:
-      image: ghcr.io/belalhesham864/vu-platform:latest
-      restart: unless-stopped
-      env_file: .env
-      command: php artisan queue:work
-      networks:
-        - vu-network
-      depends_on:
-        - db
-        - redis   
+
+  queue-worker:
+    image: ghcr.io/belalhesham864/vu-platform:latest
+    restart: unless-stopped
+    env_file: .env
+    command: php artisan queue:work
+    networks:
+      - vu-network
+    depends_on:
+      - db
+      - redis
 
   web:
     image: nginx:alpine
@@ -29,7 +28,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
     networks:
