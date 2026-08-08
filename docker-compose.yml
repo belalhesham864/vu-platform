@@ -11,6 +11,16 @@ services:
     depends_on:
       - db
       - redis
+   queue-worker:
+      image: ghcr.io/belalhesham864/vu-platform:latest
+      restart: unless-stopped
+      env_file: .env
+      command: php artisan queue:work
+      networks:
+        - vu-network
+      depends_on:
+        - db
+        - redis   
 
   web:
     image: nginx:alpine
