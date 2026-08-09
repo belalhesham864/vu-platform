@@ -83,10 +83,14 @@ class PaymentController extends Controller
 
         try {
             $paymentMethod = PaymentMethod::retrieve($request->payment_method_id);
-            if ($paymentMethod->customer !== $company->stripe_customer_id) {
-                if ($paymentMethod->customer) {
-                    $paymentMethod->detach();
-                }
+
+            if ($paymentMethod->customer && $paymentMethod->customer !== $company->stripe_customer_id) {
+                // PM belongs to a different customer — reject it
+                return apiResponse(400, 'This payment method belongs to another customer.');
+            }
+
+            if (!$paymentMethod->customer) {
+                // PM not attached to any customer — attach it
                 $paymentMethod->attach(['customer' => $company->stripe_customer_id]);
             }
 
@@ -95,41 +99,76 @@ class PaymentController extends Controller
                     'default_payment_method' => $request->payment_method_id,
                 ],
             ]);
+
+            $subscription = Subscription::create([
+                'customer' => $company->stripe_customer_id,
+                'items' => [
+                    ['price' => $plan->stripe_price_id]
+                ],
+                'default_payment_method' => $request->payment_method_id,
+                'payment_behavior' => 'default_incomplete',
+                'expand' => ['latest_invoice.payment_intent'],
+            ]);
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            Log::error('Stripe error during subscription: ' . $e->getMessage());
+            return apiResponse(400, $e->getMessage());
         } catch (\Exception $e) {
-            Log::warning('PaymentMethod attach warning: ' . $e->getMessage());
+            Log::error('Subscription error: ' . $e->getMessage());
+            return apiResponse(500, 'Failed to create subscription. Please try again.');
         }
-
-        $subscription = Subscription::create([
-            'customer' => $company->stripe_customer_id,
-            'items' => [
-                [
-                    'price' => $plan->stripe_price_id,
-                ]
-            ],
-            'default_payment_method' => $request->payment_method_id,
-            'payment_behavior' => 'default_incomplete',
-            'expand' => ['latest_invoice.payment_intent'],
-        ]);
-
-        $invoice = $subscription->latest_invoice;
 
         $clientSecret = null;
         $paymentIntentId = null;
 
-        if (isset($invoice->payment_intent)) {
-            $paymentIntent = $invoice->payment_intent;
-            if (is_object($paymentIntent)) {
-                $clientSecret = $paymentIntent->client_secret ?? null;
-                $paymentIntentId = $paymentIntent->id ?? null;
-            } elseif (is_string($paymentIntent)) {
-                $paymentIntentId = $paymentIntent;
-                try {
+        try {
+            $invoice = $subscription->latest_invoice;
+
+            // لو invoice عبارة عن string ID → جيبه من Stripe مع expand
+            if (is_string($invoice)) {
+                $invoice = \Stripe\Invoice::retrieve([
+                    'id' => $invoice,
+                    'expand' => ['payment_intent'],
+                ]);
+            }
+
+            // لو الـ invoice موجود بس payment_intent مش متوفر → نجيب الـ invoice بـ expand
+            if ($invoice && empty($invoice->payment_intent) && !empty($invoice->id)) {
+                $invoice = \Stripe\Invoice::retrieve([
+                    'id' => $invoice->id,
+                    'expand' => ['payment_intent'],
+                ]);
+            }
+
+            if ($invoice && !empty($invoice->payment_intent)) {
+                $paymentIntent = $invoice->payment_intent;
+
+                if (is_object($paymentIntent)) {
+                    $clientSecret   = $paymentIntent->client_secret ?? null;
+                    $paymentIntentId = $paymentIntent->id ?? null;
+                } elseif (is_string($paymentIntent)) {
+                    $paymentIntentId = $paymentIntent;
                     $pi = \Stripe\PaymentIntent::retrieve($paymentIntent);
-                    $clientSecret = $pi->client_secret;
-                } catch (\Exception $e) {
+                    $clientSecret   = $pi->client_secret ?? null;
                 }
             }
+
+            // Fallback: لو لسه clientSecret null، نسترجه من أحدث PaymentIntent للعميل
+            if (!$clientSecret && !empty($company->stripe_customer_id)) {
+                $pis = \Stripe\PaymentIntent::all([
+                    'customer' => $company->stripe_customer_id,
+                    'limit' => 1,
+                ]);
+
+                if (!empty($pis->data)) {
+                    $latestPi = $pis->data[0];
+                    $clientSecret   = $latestPi->client_secret ?? null;
+                    $paymentIntentId = $latestPi->id ?? null;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Could not retrieve client_secret: ' . $e->getMessage());
         }
+
 
         $payment = payments::create([
             'company_id' => $company->id,
@@ -140,10 +179,13 @@ class PaymentController extends Controller
             'status' => 'pending'
         ]);
 
+        $requiresAction = ($subscription->status === 'incomplete' || $subscription->status === 'past_due');
+
         return apiResponse(200, 'Subscription created', [
             'subscription_id' => $subscription->id,
-            'status' => $subscription->status,
-            'client_secret' => $clientSecret,
+            'status'          => $subscription->status,
+            'client_secret'   => $clientSecret,
+            'requires_action' => $requiresAction,
         ]);
     }
 
