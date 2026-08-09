@@ -4,12 +4,11 @@ namespace App\Notifications;
 
 use Ichtrojan\Otp\Otp;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 
-class ForgetPasswordNotification extends Notification implements ShouldQueue
+class ForgetPasswordNotification extends Notification 
 {
     use Queueable;
 
