@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Build and Deploy to Server
 
 on:
   push:
@@ -6,26 +6,45 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/vu-platform
-            echo "🚀 Deployment started at $(date)"
+            cd ${{ secrets.APP_DIR }}
+            # 1. سحب الملفات الجديدة على الخادم لكي يراها الـ Volume
             git pull origin main
-            composer install --no-dev --optimize-autoloader --no-interaction
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            sudo systemctl restart php8.3-fpm
-            echo "✅ Deployment complete at $(date)"
+            # 2. سحب الصورة الجديدة وتشغيلها
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose pull
+            docker compose up -d
+            # 3. مسح كاش Laravel فوراً
+            docker compose exec -T app php artisan optimize:clear
+            # 4. تنظيف الصور القديمة
+            docker image prune -f
