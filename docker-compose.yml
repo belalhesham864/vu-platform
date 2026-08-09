@@ -2,27 +2,42 @@ services:
   app:
     image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
+    entrypoint: ["/bin/bash", "/entrypoint-app.sh"]
+    command: ["php-fpm"]
     env_file: .env
     volumes:
       - app-code:/var/www
+      - ./entrypoint-app.sh:/entrypoint-app.sh:ro
     networks:
       - vu-network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   queue-worker:
     image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
     env_file: .env
-    command: php artisan queue:work
+    # Wait for MySQL, run migrations, then start the worker — no more Connection refused at boot
+    command: >
+      sh -c "
+        until php artisan migrate --force --quiet 2>/dev/null; do
+          echo '[queue-worker] Waiting for database...';
+          sleep 3;
+        done;
+        exec php artisan queue:work --tries=3 --timeout=90 --sleep=3
+      "
     volumes:
       - app-code:/var/www
     networks:
       - vu-network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   web:
     image: nginx:alpine
@@ -52,12 +67,23 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - vu-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USERNAME}", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   redis:
     image: redis:alpine
     restart: unless-stopped
     networks:
       - vu-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   vu-network:
@@ -68,3 +94,4 @@ volumes:
   certbot-etc:
   certbot-var:
   app-code:
+    external: true
