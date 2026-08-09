@@ -18,7 +18,7 @@ class verfaidEmailOtpNotification extends Notification implements ShouldQueue
     public $otp;
     public function __construct()
     {
-        $this->otp=new Otp();
+        $this->otp = new Otp();
     }
 
     /**
@@ -36,14 +36,14 @@ class verfaidEmailOtpNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-       $otp= $this->otp->generate($notifiable->email,'numeric',6);
-           return (new MailMessage)
+        $otp = $this->otp->generate($notifiable->email, 'numeric', 6);
+        return (new MailMessage)
             ->subject('Verify your email')
             ->line('Your verification code is:')
             ->line($otp->token)
             ->line('This code will expire soon.');
     }
-    
+
     /**
      * Get the array representation of the notification.
      *
