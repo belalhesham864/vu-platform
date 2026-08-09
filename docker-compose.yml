@@ -19,18 +19,11 @@ services:
   queue-worker:
     image: ghcr.io/belalhesham864/vu-platform:latest
     restart: unless-stopped
+    entrypoint: ["/bin/bash", "/entrypoint-worker.sh"]
     env_file: .env
-    # Wait for MySQL, run migrations, then start the worker — no more Connection refused at boot
-    command: >
-      sh -c "
-        until php artisan migrate --force --quiet 2>/dev/null; do
-          echo '[queue-worker] Waiting for database...';
-          sleep 3;
-        done;
-        exec php artisan queue:work --tries=3 --timeout=90 --sleep=3
-      "
     volumes:
       - app-code:/var/www
+      - ./entrypoint-worker.sh:/entrypoint-worker.sh:ro
     networks:
       - vu-network
     depends_on:
@@ -91,7 +84,14 @@ networks:
 
 volumes:
   db-data:
+    name: vu-platform_db-data
+    external: true
   certbot-etc:
+    name: vu-platform_certbot-etc
+    external: true
   certbot-var:
+    name: vu-platform_certbot-var
+    external: true
   app-code:
+    name: vu-platform_app-code
     external: true
