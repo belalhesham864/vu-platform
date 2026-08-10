@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-        use HasFactory;
-
+    use HasFactory;
 
     protected $fillable = [
         'candidate_id',

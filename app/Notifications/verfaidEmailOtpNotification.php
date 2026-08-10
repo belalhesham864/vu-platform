@@ -3,12 +3,11 @@
 namespace App\Notifications;
 
 use Ichtrojan\Otp\Otp;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class verfaidEmailOtpNotification extends Notification implements ShouldQueue
+class verfaidEmailOtpNotification extends Notification 
 {
     use Queueable;
 
@@ -18,7 +17,7 @@ class verfaidEmailOtpNotification extends Notification implements ShouldQueue
     public $otp;
     public function __construct()
     {
-        $this->otp=new Otp();
+        $this->otp = new Otp();
     }
 
     /**
@@ -36,14 +35,14 @@ class verfaidEmailOtpNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-       $otp= $this->otp->generate($notifiable->email,'numeric',6);
-           return (new MailMessage)
+        $otp = $this->otp->generate($notifiable->email, 'numeric', 6);
+        return (new MailMessage)
             ->subject('Verify your email')
             ->line('Your verification code is:')
             ->line($otp->token)
             ->line('This code will expire soon.');
     }
-    
+
     /**
      * Get the array representation of the notification.
      *

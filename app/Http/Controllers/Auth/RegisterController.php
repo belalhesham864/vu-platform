@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
 {
-  public function register(RgisterRequest $request, RegisterServices $register)
-  {
-    return $register->Register($request);
-  }
+    public function register(RgisterRequest $request, RegisterServices $register)
+    {
+        return $register->Register($request);
+    }
 }

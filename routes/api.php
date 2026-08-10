@@ -17,6 +17,12 @@ use App\Http\Controllers\MangmentTeamController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\Dashboard\AdminDashboardController;
+use App\Http\Controllers\Dashboard\HrDashboardController;
+use App\Http\Controllers\Dashboard\HrInterviewerDashboardController;
+use App\Http\Controllers\Dashboard\TechInterviewerDashboardController;
+use App\Http\Controllers\Dashboard\AccountManagerDashboardController;
+use App\Http\Controllers\Dashboard\OwnerDashboardController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PositionStageController;
 use App\Http\Controllers\SettingController;
@@ -25,17 +31,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-
-
-
-
-
-
-
-
 Route::get('Home/state', [HomeController::class, 'state']);
 Route::post('Home/subscribers', [HomeController::class, 'subscriber']);
-
 
 Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:register');
 
@@ -60,10 +57,8 @@ Route::controller(ForgetPasswordController::class)->group(function () {
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:reset-password');
 
-
 Route::post('/register-candidate', [RegisterController::class, 'registerCandidate'])->middleware('throttle:register');
 Route::post('/login-candidate', [LoginController::class, 'loginCandidate'])->middleware('throttle:login');
-
 
 Route::middleware('auth:api')->group(function () {
     Route::resource('categories', CategoryController::class);
@@ -89,6 +84,12 @@ Route::middleware('auth:api')->group(function () {
     Route::resource('position-stages', PositionStageController::class);
     Route::get('team-members', [TeamMemberController::class, 'index']);
 
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/owner', [OwnerDashboardController::class,'index']);
+        Route::get('/admin',[AdminDashboardController::class, 'index']);
+      
+    });
+
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationsController::class, 'allNotifications']);
         Route::get('/unread', [NotificationsController::class, 'unReadNotifications']);
@@ -96,14 +97,14 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/read-all', [NotificationsController::class, 'markAllAsRead']);
         Route::delete('/{notification}', [NotificationsController::class, 'destroy']);
     });
-    
-    Route::post('/logout', [LoginController::class, 'logout']);
+
 });
 
 Route::controller(SettingController::class)->middleware('auth:api')->prefix('setting/')->group(function () {
     Route::get('/', 'show');
     Route::put('/update', 'update');
 });
+
 Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix('team/')->group(function () {
     Route::get('/', 'index');
     Route::Post('/invite', 'invite');
@@ -112,14 +113,12 @@ Route::controller(MangmentTeamController::class)->middleware('auth:api')->prefix
     Route::post('/{id}/resend-invite', [MangmentTeamController::class, 'resendInvite']);
     Route::delete('/{id}', [MangmentTeamController::class, 'delete']);
 });
+
 Route::post('/set-password', [MangmentTeamController::class, 'resetPassword']);
 
 Route::get('/plans', [PlanController::class, 'index']);
 Route::get('/plans/{plan}', [PlanController::class, 'show']);
 
-
 Route::post('payments/create', [PaymentController::class, 'create'])->middleware('auth:api');
-Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
-Route::post('payments/create',[PaymentController::class,'create'])->middleware('auth:api');
 Route::post('/payments/subscription', [PaymentController::class, 'subscription'])->middleware('auth:api');
 Route::post('/stripe/webhook', [PaymentController::class, 'webhook']);
