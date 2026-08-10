@@ -15,7 +15,7 @@ class PlanSeeder extends Seeder
     public function run(): void
     {
 
-           $basic= Plan::create([
+        $basic = Plan::create([
             'name' => 'Basic',
             'slug' => Str::slug('Basic'),
             'price' => 2000,
@@ -24,18 +24,18 @@ class PlanSeeder extends Seeder
             'description' => 'Basic Plan',
             'is_custom' => false,
             'is_active' => true,
-         'stripe_price_id' => 'price_1TzpBz22Zz086J0hkXQyOS4B',
+            'stripe_price_id' => 'price_1TzpBz22Zz086J0hkXQyOS4B',
 
         ]);
         $basic->features()->createMany([
             ['feature' => 'Up to 5 job announcements'],
-    ['feature' => '500 interview credits/month'],
-    ['feature' => 'Basic AI evaluation'],
-    ['feature' => 'Standard reports'],
-    ['feature' => 'Email support'],
+            ['feature' => '500 interview credits/month'],
+            ['feature' => 'Basic AI evaluation'],
+            ['feature' => 'Standard reports'],
+            ['feature' => 'Email support'],
         ]);
 
-          $perimum=Plan::create([
+        $perimum = Plan::create([
             'name' => 'Premium',
             'slug' => Str::slug('Premium'),
             'price' => 10000,
@@ -44,18 +44,18 @@ class PlanSeeder extends Seeder
             'description' => 'Premium Plan',
             'is_custom' => false,
             'is_active' => true,
-            'stripe_price_id'=>'price_1TzpCY22Zz086J0hd7vdtSJs'
+            'stripe_price_id' => 'price_1TzpCY22Zz086J0hd7vdtSJs'
         ]);
         $perimum->features()->createMany([
-             ['feature' => 'Unlimited job announcements'],
-    ['feature' => '3000 interview credits/month'],
-    ['feature' => 'Advanced analytics'],
-    ['feature' => 'Team collaboration'],
-    ['feature' => 'Priority support'],
-    ['feature' => 'API access'],
+            ['feature' => 'Unlimited job announcements'],
+            ['feature' => '3000 interview credits/month'],
+            ['feature' => 'Advanced analytics'],
+            ['feature' => 'Team collaboration'],
+            ['feature' => 'Priority support'],
+            ['feature' => 'API access'],
         ]);
 
-      $enterprise=  Plan::create([
+        $enterprise =  Plan::create([
             'name' => 'Enterprise',
             'slug' => Str::slug('Enterprise'),
             'price' => null,
@@ -64,13 +64,13 @@ class PlanSeeder extends Seeder
             'description' => 'Enterprise Plan',
             'is_custom' => true,
             'is_active' => true,
-             'stripe_price_id' => null,
+            'stripe_price_id' => null,
         ]);
-$enterprise->features()->createMany([
-    ['feature' => 'Everything in Premium'],
-    ['feature' => 'Dedicated account manager'],
-    ['feature' => 'Custom integrations'],
-    ['feature' => 'SLA & on-site training'],
-]);
+        $enterprise->features()->createMany([
+            ['feature' => 'Everything in Premium'],
+            ['feature' => 'Dedicated account manager'],
+            ['feature' => 'Custom integrations'],
+            ['feature' => 'SLA & on-site training'],
+        ]);
     }
 }
