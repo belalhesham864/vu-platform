@@ -25,7 +25,6 @@ return [
     "http://localhost:3000",
     "https://vuplatformzikolaa.duckdns.org"
 ],
-##################################################################(محدش يشيله(
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
