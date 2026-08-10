@@ -1,0 +1,893 @@
+{
+  "info": {
+    "name": "VU-Platform API",
+    "_postman_id": "vu-platform-api-collection",
+    "description": "Complete API collection for VU-Platform — HR & Recruitment SaaS built with Laravel.\n\n## Setup\n1. Set `base_url` variable to your API URL (e.g. `http://localhost:8000/api`)\n2. After login, the `token` variable is auto-set\n3. Use the **Auth** folder first to register/login",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api", "type": "string" },
+    { "key": "token",    "value": "",                           "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔑 Auth",
+      "item": [
+        {
+          "name": "Register Company",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "company_name", "value": "Acme Corp",             "type": "text" },
+                { "key": "industry",     "value": "Technology",            "type": "text" },
+                { "key": "location",     "value": "Cairo, Egypt",          "type": "text" },
+                { "key": "about",        "value": "We build great things", "type": "text" },
+                { "key": "phone",        "value": "+201000000000",         "type": "text" },
+                { "key": "website",      "value": "https://acme.com",      "type": "text" },
+                { "key": "company_size", "value": "50-100",                "type": "text" },
+                { "key": "logo",         "src":   "",                      "type": "file" },
+                { "key": "name",         "value": "Ahmed Ali",             "type": "text" },
+                { "key": "email",        "value": "ahmed@acme.com",        "type": "text" },
+                { "key": "password",              "value": "Password1", "type": "text" },
+                { "key": "password_confirmation", "value": "Password1", "type": "text" }
+              ]
+            },
+            "description": "Register a new company. Auto-creates an Owner account and sends email OTP.\n\n**Password rules:** min 8 chars, letters, mixed case, numbers"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) { const r = pm.response.json(); pm.collectionVariables.set('token', r.token || r.data?.token || ''); }"], "type": "text/javascript" } }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmed@acme.com\",\n  \"password\": \"Password1\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Login and receive JWT token. Token is auto-saved to collection variable."
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) { const r = pm.response.json(); pm.collectionVariables.set('token', r.data?.token || r.token || ''); }"], "type": "text/javascript" } }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] },
+            "description": "Invalidate the current JWT token."
+          }
+        },
+        {
+          "name": "Verify Email (OTP)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/email/verifay", "host": ["{{base_url}}"], "path": ["email", "verifay"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"12345\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/email/verifay/sendotp", "host": ["{{base_url}}"], "path": ["email", "verifay", "sendotp"] },
+            "description": "Throttled: limited resend attempts."
+          }
+        },
+        {
+          "name": "Forget Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/forget-Password", "host": ["{{base_url}}"], "path": ["forget-Password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmed@acme.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Sends a 5-digit numeric OTP to the email."
+          }
+        },
+        {
+          "name": "Check OTP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/check-Otp", "host": ["{{base_url}}"], "path": ["check-Otp"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmed@acme.com\",\n  \"token\": \"12345\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/reset-password", "host": ["{{base_url}}"], "path": ["reset-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmed@acme.com\",\n  \"token\": \"RESET_TOKEN_HERE\",\n  \"password\": \"NewPassword1\",\n  \"password_confirmation\": \"NewPassword1\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Candidate Auth",
+      "item": [
+        {
+          "name": "Register Candidate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/register-candidate", "host": ["{{base_url}}"], "path": ["register-candidate"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sara Mohamed\",\n  \"email\": \"sara@candidate.com\",\n  \"phone\": \"+201111111111\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Login Candidate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/login-candidate", "host": ["{{base_url}}"], "path": ["login-candidate"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sara@candidate.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📂 Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Category",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories", "1"] }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering & DevOps\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories", "1"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💼 Positions",
+      "item": [
+        {
+          "name": "List Positions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/positions?filter[title]=engineer&sort=-created_at",
+              "host": ["{{base_url}}"], "path": ["positions"],
+              "query": [
+                { "key": "filter[title]",       "value": "engineer",     "disabled": true },
+                { "key": "filter[description]", "value": "backend",      "disabled": true },
+                { "key": "sort",                "value": "-created_at",  "disabled": true }
+              ]
+            },
+            "description": "**Filters:** `filter[title]`, `filter[description]`\n**Sorts:** `sort=created_at`, `sort=-created_at`"
+          }
+        },
+        {
+          "name": "Create Position",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/positions", "host": ["{{base_url}}"], "path": ["positions"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 1,\n  \"title\": \"Senior Backend Engineer\",\n  \"description\": \"We are looking for a senior backend engineer...\",\n  \"requirements\": \"5+ years experience with PHP/Laravel\",\n  \"work_location\": \"Remote\",\n  \"salary\": 15000,\n  \"employment_type\": \"Full-time\",\n  \"status\": \"Open\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**work_location:** `On-site` | `Remote` | `Hybrid`\n**employment_type:** `Full-time` | `Part-time` | `Contract` | `Internship`\n**status:** `Open` | `Closed`"
+          }
+        },
+        {
+          "name": "Get Position",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/positions/1", "host": ["{{base_url}}"], "path": ["positions", "1"] }
+          }
+        },
+        {
+          "name": "Update Position",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/positions/1", "host": ["{{base_url}}"], "path": ["positions", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 1,\n  \"title\": \"Lead Backend Engineer\",\n  \"description\": \"Updated description...\",\n  \"requirements\": \"7+ years experience\",\n  \"work_location\": \"Hybrid\",\n  \"salary\": 20000,\n  \"employment_type\": \"Full-time\",\n  \"status\": \"Open\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Position",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/positions/1", "host": ["{{base_url}}"], "path": ["positions", "1"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Position Stages",
+      "item": [
+        {
+          "name": "List Stages",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/position-stages", "host": ["{{base_url}}"], "path": ["position-stages"] }
+          }
+        },
+        {
+          "name": "Create Stage",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/position-stages", "host": ["{{base_url}}"], "path": ["position-stages"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position_id\": 1,\n  \"stage_name\": \"Technical Assessment\",\n  \"stage_order\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Stage",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/position-stages/1", "host": ["{{base_url}}"], "path": ["position-stages", "1"] }
+          }
+        },
+        {
+          "name": "Update Stage",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/position-stages/1", "host": ["{{base_url}}"], "path": ["position-stages", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position_id\": 1,\n  \"stage_name\": \"Final HR Interview\",\n  \"stage_order\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Stage",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/position-stages/1", "host": ["{{base_url}}"], "path": ["position-stages", "1"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📝 Applications",
+      "item": [
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/applications",
+              "host": ["{{base_url}}"], "path": ["applications"],
+              "query": [
+                { "key": "filter[status]",   "value": "Under Review", "disabled": true },
+                { "key": "filter[decision]", "value": "Accepted",     "disabled": true },
+                { "key": "filter[name]",     "value": "Ahmed",        "disabled": true },
+                { "key": "sort",             "value": "-created_at",  "disabled": true }
+              ]
+            },
+            "description": "**Filters:** `filter[status]`, `filter[decision]`, `filter[name]` (candidate name)\n**Sorts:** `sort=created_at`, `sort=-decision_date`\n\n**Status values:** `Under Review` | `Scheduled` | `Shortlisted` | `Accepted` | `Rejected`"
+          }
+        },
+        {
+          "name": "Create Application",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications", "host": ["{{base_url}}"], "path": ["applications"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidate_id\": 1,\n  \"position_id\": 1,\n  \"application_type\": \"AI Interview\",\n  \"status\": \"Under Review\",\n  \"start_date\": \"2026-09-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**application_type:** `AI Interview` | `Technical Interview` | `Final Interview`"
+          }
+        },
+        {
+          "name": "Get Application",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1", "host": ["{{base_url}}"], "path": ["applications", "1"] }
+          }
+        },
+        {
+          "name": "Update Application",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1", "host": ["{{base_url}}"], "path": ["applications", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidate_id\": 1,\n  \"position_id\": 1,\n  \"application_type\": \"Technical Interview\",\n  \"status\": \"Scheduled\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Application",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1", "host": ["{{base_url}}"], "path": ["applications", "1"] }
+          }
+        },
+        {
+          "name": "Decision — Accept",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1/accept", "host": ["{{base_url}}"], "path": ["applications", "1", "accept"] },
+            "description": "**Available decisions:** `accept` | `reject` | `shortlist`"
+          }
+        },
+        {
+          "name": "Decision — Reject",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1/reject", "host": ["{{base_url}}"], "path": ["applications", "1", "reject"] }
+          }
+        },
+        {
+          "name": "Decision — Shortlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1/shortlist", "host": ["{{base_url}}"], "path": ["applications", "1", "shortlist"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Candidates",
+      "item": [
+        {
+          "name": "List Candidates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/candidates", "host": ["{{base_url}}"], "path": ["candidates"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🎙️ Interviews",
+      "item": [
+        {
+          "name": "List Interviews",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/interviews",
+              "host": ["{{base_url}}"], "path": ["interviews"],
+              "query": [
+                { "key": "filter[candidate]", "value": "Ahmed",    "disabled": true },
+                { "key": "filter[position]",  "value": "Backend",  "disabled": true },
+                { "key": "filter[status]",    "value": "Accepted", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Schedule Interview",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/interviews", "host": ["{{base_url}}"], "path": ["interviews"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1,\n  \"available_until\": \"2026-09-15 18:00:00\",\n  \"estimated_duration\": 60,\n  \"question_count\": 10,\n  \"status\": \"pending\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "`interviewer_id` is auto-set from the authenticated user.\n\n**status values:** `pending` | `accepted` | `expired` | `completed`"
+          }
+        },
+        {
+          "name": "Get Interview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/interviews/1", "host": ["{{base_url}}"], "path": ["interviews", "1"] }
+          }
+        },
+        {
+          "name": "Update Interview",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/interviews/1", "host": ["{{base_url}}"], "path": ["interviews", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1,\n  \"available_until\": \"2026-09-20 18:00:00\",\n  \"estimated_duration\": 45,\n  \"question_count\": 8,\n  \"status\": \"accepted\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Interview",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/interviews/1", "host": ["{{base_url}}"], "path": ["interviews", "1"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⭐ Evaluations",
+      "item": [
+        {
+          "name": "List Evaluations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/evaluations", "host": ["{{base_url}}"], "path": ["evaluations"] }
+          }
+        },
+        {
+          "name": "Create Evaluation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/evaluations", "host": ["{{base_url}}"], "path": ["evaluations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1,\n  \"interview_id\": 1,\n  \"overall_score\": 85,\n  \"strengths\": \"Strong communicator, good problem solving\",\n  \"weaknesses\": \"Limited Docker experience\",\n  \"recording_url\": \"https://recordings.example.com/interview-1.mp4\",\n  \"notes\": \"Recommend for final round\",\n  \"answers\": [\n    {\n      \"question\": \"Describe your experience with Laravel\",\n      \"answer\": \"5 years of professional experience building REST APIs...\"\n    },\n    {\n      \"question\": \"How do you handle N+1 queries?\",\n      \"answer\": \"I use Eager Loading with with() method...\"\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "`overall_score` is between 0 and 100. At least one answer is required."
+          }
+        },
+        {
+          "name": "Get Evaluation",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/evaluations/1", "host": ["{{base_url}}"], "path": ["evaluations", "1"] }
+          }
+        },
+        {
+          "name": "Update Evaluation",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/evaluations/1", "host": ["{{base_url}}"], "path": ["evaluations", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1,\n  \"interview_id\": 1,\n  \"overall_score\": 90,\n  \"strengths\": \"Excellent technical skills\",\n  \"weaknesses\": \"None significant\",\n  \"answers\": [\n    { \"question\": \"Updated Q\", \"answer\": \"Updated A\" }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Evaluation",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/evaluations/1", "host": ["{{base_url}}"], "path": ["evaluations", "1"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Dashboards",
+      "item": [
+        {
+          "name": "Owner Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/owner", "host": ["{{base_url}}"], "path": ["dashboard", "owner"] },
+            "description": "**Role required:** Owner\n\nReturns: time_to_hire, cost_saved_this_quarter, candidates_processed, performance_by_department"
+          }
+        },
+        {
+          "name": "Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/admin", "host": ["{{base_url}}"], "path": ["dashboard", "admin"] },
+            "description": "**Role required:** Admin\n\nReturns: active_team_members, pending_invites, plan_renews_in, attention items"
+          }
+        },
+        {
+          "name": "HR Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/hr", "host": ["{{base_url}}"], "path": ["dashboard", "hr"] },
+            "description": "**Role required:** HR"
+          }
+        },
+        {
+          "name": "HR Interviewer Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/hr-interviewer", "host": ["{{base_url}}"], "path": ["dashboard", "hr-interviewer"] },
+            "description": "**Role required:** HR-Interviewer"
+          }
+        },
+        {
+          "name": "Tech Interviewer Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/tech-interviewer", "host": ["{{base_url}}"], "path": ["dashboard", "tech-interviewer"] },
+            "description": "**Role required:** Tech-Interviewer"
+          }
+        },
+        {
+          "name": "Account Manager Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/account-manager", "host": ["{{base_url}}"], "path": ["dashboard", "account-manager"] },
+            "description": "**Role required:** Account-Manager"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications?page=1", "host": ["{{base_url}}"], "path": ["notifications"], "query": [{ "key": "page", "value": "1" }] },
+            "description": "Paginated — 10 per page."
+          }
+        },
+        {
+          "name": "Unread Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/unread", "host": ["{{base_url}}"], "path": ["notifications", "unread"] }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/NOTIFICATION_UUID/read", "host": ["{{base_url}}"], "path": ["notifications", "NOTIFICATION_UUID", "read"] },
+            "description": "Replace `NOTIFICATION_UUID` with the notification's UUID string."
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications/NOTIFICATION_UUID", "host": ["{{base_url}}"], "path": ["notifications", "NOTIFICATION_UUID"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⚙️ Settings",
+      "item": [
+        {
+          "name": "Get Company Settings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/setting", "host": ["{{base_url}}"], "path": ["setting"] },
+            "description": "**Permission required:** `manage_company_settings`\n\nReturns full company info with Owner details."
+          }
+        },
+        {
+          "name": "Update Company Settings",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/setting/update", "host": ["{{base_url}}"], "path": ["setting", "update"] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "company_name", "value": "Acme Corp Updated",      "type": "text" },
+                { "key": "industry",     "value": "Technology",             "type": "text" },
+                { "key": "location",     "value": "Alexandria, Egypt",      "type": "text" },
+                { "key": "about",        "value": "Updated company about.", "type": "text" },
+                { "key": "phone",        "value": "+201000000001",          "type": "text" },
+                { "key": "website",      "value": "https://acme.com",       "type": "text" },
+                { "key": "company_size", "value": "100-200",                "type": "text" },
+                { "key": "logo",         "src":   "",                       "type": "file", "disabled": true }
+              ]
+            },
+            "description": "Logo is optional. If provided, replaces the existing logo."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Team Management",
+      "item": [
+        {
+          "name": "List Team",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team", "host": ["{{base_url}}"], "path": ["team"] },
+            "description": "**Permission required:** `manage_team_members`"
+          }
+        },
+        {
+          "name": "Invite Member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team/invite", "host": ["{{base_url}}"], "path": ["team", "invite"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sara Ahmed\",\n  \"email\": \"sara@acme.com\",\n  \"password\": \"TempPass1\",\n  \"role\": \"HR\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**Available roles:** `Admin` | `HR` | `HR-Interviewer` | `Tech-Interviewer` | `Account-Manager`\n\nSends an activation email with a password-reset token."
+          }
+        },
+        {
+          "name": "Update Member",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team/1", "host": ["{{base_url}}"], "path": ["team", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"Admin\",\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Cannot modify Owner role."
+          }
+        },
+        {
+          "name": "Resend Invite",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team/1/resend-invite", "host": ["{{base_url}}"], "path": ["team", "1", "resend-invite"] },
+            "description": "Only works for users with `status: invited`."
+          }
+        },
+        {
+          "name": "Delete Member",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team/1", "host": ["{{base_url}}"], "path": ["team", "1"] },
+            "description": "Cannot delete the Owner."
+          }
+        },
+        {
+          "name": "Set Password (Invited User)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/set-password", "host": ["{{base_url}}"], "path": ["set-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sara@acme.com\",\n  \"token\": \"TOKEN_FROM_EMAIL\",\n  \"password\": \"NewSecure123\",\n  \"password_confirmation\": \"NewSecure123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "No auth required. Used by invited members to activate their account. Sets `status: active` and `email_verified_at`."
+          }
+        },
+        {
+          "name": "List Team Members (Read-only)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/team-members", "host": ["{{base_url}}"], "path": ["team-members"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💳 Plans & Payments",
+      "item": [
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/plans", "host": ["{{base_url}}"], "path": ["plans"] },
+            "description": "Public endpoint — no auth required."
+          }
+        },
+        {
+          "name": "Get Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/plans/1", "host": ["{{base_url}}"], "path": ["plans", "1"] }
+          }
+        },
+        {
+          "name": "Create Payment (SetupIntent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payments/create", "host": ["{{base_url}}"], "path": ["payments", "create"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**Step 1 of 2** — Creates a Stripe SetupIntent to save a payment method.\n\nReturns `client_secret` → use with Stripe.js `confirmSetup()` on the frontend.\n\nIf plan `is_custom: true`, returns 404 (Contact Sales)."
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payments/subscription", "host": ["{{base_url}}"], "path": ["payments", "subscription"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_id\": 1,\n  \"payment_method_id\": \"pm_card_visa\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**Step 2 of 2** — Creates the Stripe Subscription.\n\nIf `requires_action: true` → frontend must complete 3D Secure using the returned `client_secret`.\n\nSubscription is activated via Stripe Webhook (`invoice.payment_succeeded`)."
+          }
+        },
+        {
+          "name": "Stripe Webhook",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Stripe-Signature", "value": "t=...,v1=..." }],
+            "url": { "raw": "{{base_url}}/stripe/webhook", "host": ["{{base_url}}"], "path": ["stripe", "webhook"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"type\": \"invoice.payment_succeeded\", \"data\": { \"object\": {} } }",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "**Internal — called by Stripe only.**\n\nHandled events:\n- `invoice.payment_succeeded` → activate subscription\n- `invoice.payment_failed` → mark as failed\n- `customer.subscription.updated` → sync status\n- `customer.subscription.deleted` → cancel subscription"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏠 Public",
+      "item": [
+        {
+          "name": "Platform Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/Home/state", "host": ["{{base_url}}"], "path": ["Home", "state"] },
+            "description": "Returns platform-wide stats for the landing page:\n- total_candidates_hired\n- success_rate (%)\n- active_companies"
+          }
+        },
+        {
+          "name": "Subscribe to Newsletter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/Home/subscribers", "host": ["{{base_url}}"], "path": ["Home", "subscribers"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"interested@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    }
+
+  ]
+}
