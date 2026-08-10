@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::get('Home/state', [HomeController::class, 'state']);
 Route::post('Home/subscribers', [HomeController::class, 'subscriber']);
 
