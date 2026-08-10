@@ -1,59 +1,189 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
 </p>
 
-## About Laravel
+# VU-Platform
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A multi-tenant **SaaS HR & Recruitment Management API** built with Laravel. Companies register on the platform and run their full hiring pipeline — from job posting to final hiring decision — with role-based access control and Stripe-powered billing.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+- 🏢 **Company registration** with automatic Owner account creation
+- 👥 **Team management** — invite members, assign roles, manage access
+- 💼 **Job positions** with department categories and custom pipeline stages
+- 📋 **Application tracking** — receive, shortlist, accept, or reject candidates
+- 🎙️ **Interview scheduling** with interviewer assignment
+- ⭐ **Candidate evaluations** with Q&A-based scoring
+- 📊 **Role-specific dashboards** with KPIs per role (Owner, Admin, HR, Interviewers...)
+- 💳 **Stripe billing** — plans, subscriptions, and webhook support
+- 🔔 **Notifications** — email notifications for invites, OTPs, and key events
+- 🐳 **Docker-ready** with Nginx, PHP-FPM, and MySQL
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-## Laravel Sponsors
+| Layer | Technology |
+|-------|-----------|
+| Framework | Laravel 11 |
+| Language | PHP 8.3 |
+| Auth | JWT (`php-open-source-saver/jwt-auth`) |
+| Authorization | Spatie Laravel Permission |
+| Payments | Stripe PHP SDK |
+| OTP | `ichtrojan/laravel-otp` |
+| Database | MySQL |
+| Web Server | Nginx |
+| Containers | Docker + Docker Compose |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Roles
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Role | Description |
+|------|-------------|
+| `Owner` | Full access — company owner |
+| `Admin` | Manage team, billing, and settings |
+| `HR` | Manage positions and applications |
+| `HR-Interviewer` | Conduct HR interviews |
+| `Tech-Interviewer` | Conduct technical interviews |
+| `Account-Manager` | Handle billing and accounts |
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Getting Started
 
-## Code of Conduct
+### Requirements
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- PHP 8.2+
+- Composer
+- MySQL
+- Node.js
+- Stripe account
 
-## Security Vulnerabilities
+### Installation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-org/VU-Platform.git
+cd VU-Platform
+
+# 2. Install dependencies
+composer install
+npm install && npm run build
+
+# 3. Setup environment
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
+
+# 4. Edit .env — set DB_*, STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET, MAIL_*
+
+# 5. Run migrations & seeders
+php artisan migrate --seed
+
+# 6. Start server
+php artisan serve
+```
+
+### Docker Quick Start
+
+```bash
+cp .env.example .env
+# fill in .env values
+docker-compose up --build
+```
+
+---
+
+## API Overview
+
+**Base URL:** `/api`  
+**Auth Header:** `Authorization: Bearer {jwt_token}`
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/register` | Register company + Owner |
+| POST | `/login` | Login and receive JWT |
+| DELETE | `/logout` | Invalidate token |
+| POST | `/forget-Password` | Send OTP for password reset |
+| POST | `/check-Otp` | Validate OTP |
+| POST | `/reset-password` | Reset password |
+| POST | `/email/verifay` | Verify email via OTP |
+
+### Core Resources *(Auth Required)*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/positions` | List / create job positions |
+| GET/POST | `/applications` | List / submit applications |
+| POST | `/applications/{id}/{decision}` | Accept, reject, or shortlist |
+| GET/POST | `/interviews` | List / schedule interviews |
+| GET/POST | `/evaluations` | List / submit evaluations |
+| GET/POST | `/categories` | Manage job categories |
+| GET/POST | `/position-stages` | Manage pipeline stages |
+
+### Team & Settings *(Auth Required)*
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/team` | List team members |
+| POST | `/team/invite` | Invite a new member |
+| PATCH | `/team/{user}` | Update member role/status |
+| DELETE | `/team/{id}` | Remove member |
+| POST | `/set-password` | Activate invited account |
+| GET/PUT | `/setting` | View / update company settings |
+
+### Dashboards *(Role-gated)*
+
+| Endpoint | Role |
+|----------|------|
+| `GET /dashboard/owner` | Owner |
+| `GET /dashboard/admin` | Admin |
+| `GET /dashboard/hr` | HR |
+| `GET /dashboard/hr-interviewer` | HR-Interviewer |
+| `GET /dashboard/tech-interviewer` | Tech-Interviewer |
+| `GET /dashboard/account-manager` | Account-Manager |
+
+### Billing
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/plans` | List available plans |
+| POST | `/payments/create` | Create Stripe SetupIntent |
+| POST | `/payments/subscription` | Subscribe to a plan |
+| POST | `/stripe/webhook` | Stripe event webhook |
+
+### Notifications
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/notifications` | All notifications (paginated) |
+| GET | `/notifications/unread` | Unread only |
+| PUT | `/notifications/{id}/read` | Mark as read |
+| PUT | `/notifications/read-all` | Mark all as read |
+| DELETE | `/notifications/{id}` | Delete notification |
+
+---
+
+## Database Schema (Summary)
+
+```
+Company ──< User
+Company ──< Position ──< Application ──< Interview
+                     └──< Evaluation ──< EvaluationAnswer
+Position ──< PositionStage
+Position >── Category
+Application >── Candidate
+Company ──< payments >── Plan ──< plan_features
+Company ──< subscriptions >── Plan
+```
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software. All rights reserved.
