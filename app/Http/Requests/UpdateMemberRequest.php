@@ -23,8 +23,8 @@ class UpdateMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-               'role'   => ['required', 'string', 'exists:roles,name'],
-            'status' => ['required', 'string', 'in:active,inactive'],
+               'role'   => ['sometimes', 'string', 'exists:roles,name'],
+            'status' => ['sometimes', 'string', 'in:active,inactive'],
         ];
     }
 }
