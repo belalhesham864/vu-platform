@@ -26,7 +26,6 @@ class InviteMemberRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:50', 'unique:users,email'],
-            'password' => ['required'],
             'role' => ['required', 'exists:roles,name'],
         ];
     }
