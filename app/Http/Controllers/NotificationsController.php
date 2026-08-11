@@ -22,7 +22,9 @@ class NotificationsController extends Controller
     {
         $user = Auth::user();
 
-        $unreadNotifications = $user->unreadNotifications()->paginate();
+        $unreadNotifications = $user->unreadNotifications()
+        ->latest()
+        ->paginate(5);
 
         if ($unreadNotifications->isEmpty()) {
             return apiResponse(200, 'No unread notifications found');
@@ -33,13 +35,13 @@ class NotificationsController extends Controller
 
     public function markAsRead($notification)
     {
-        // $user = Auth::user();
+        $user = Auth::user();
 
-        // $notification = $user->unreadNotifications()->find($id);
+        $notification = $user->notifications()->find($notification);
 
-        // if (!$notification) {
-        //     return apiResponse(404, 'Notification not found');
-        // }
+        if (!$notification) {
+            return apiResponse(404, 'Notification not found');
+        }
 
         $notification->markAsRead();
 

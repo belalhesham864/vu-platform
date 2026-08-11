@@ -1,4 +1,4 @@
-name: Build and Deploy to Server
+name: Deploy to Server
 
 on:
   push:
@@ -38,13 +38,24 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.APP_DIR }}
-            # 1. سحب الملفات الجديدة على الخادم لكي يراها الـ Volume
+            # 1. Pull new code so the volume sees it
             git pull origin main
-            # 2. سحب الصورة الجديدة وتشغيلها
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # 2. Login to GHCR using PAT (GITHUB_TOKEN doesn't work for read on server)
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # 3. Pull the new image and start containers
             docker compose pull
             docker compose up -d
-            # 3. مسح كاش Laravel فوراً
+
+            # 4. Run any new migrations
+            docker compose exec -T app php artisan migrate --force
+
+            # 5. Install any new composer packages
+            docker compose exec -T app composer install --no-dev --no-interaction 2>/dev/null || true
+
+            # 6. Clear Laravel caches
             docker compose exec -T app php artisan optimize:clear
-            # 4. تنظيف الصور القديمة
+
+            # 7. Clean old unused images to free disk space
             docker image prune -f
