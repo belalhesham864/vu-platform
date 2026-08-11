@@ -3,17 +3,13 @@
 namespace App\Notifications;
 
 use Ichtrojan\Otp\Otp;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class verfaidEmailOtpNotification extends Notification 
+class verfaidEmailOtpNotification extends Notification
 {
-    use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
+
     public $otp;
     public function __construct()
     {
